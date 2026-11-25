@@ -635,7 +635,7 @@ table.pos-table { width: 100%; border-collapse: collapse; font-variant-numeric: 
   async function initDb() {
     let db = null;
     try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
-    if (!db) { state.dbState = 'unavailable'; rebuild(); render(); return; }
+    if (!db) { state.dbState = 'unavailable'; rebuild(); render(); autoSample(); return; }
     state.db = db;
     try {
       const user = window.claude && window.claude.use ? await window.claude.use('user') : null;
@@ -663,6 +663,21 @@ table.pos-table { width: 100%; border-collapse: collapse; font-variant-numeric: 
       state.notes = new Map(snap.docs.map(d => [d.id, d.data()]));
       render();
     }, () => {});
+  }
+
+  // Without saved storage (a plain web copy, or a signed-out visitor), show the sample so the app isn't empty.
+  async function autoSample() {
+    if (state.docs.size) return;
+    try {
+      const res = await fetch('sample-session.txt');
+      if (!res.ok) return;
+      const agg = VF.analyze([await res.text()]);
+      if (state.docs.size) return;
+      VF.buildDocs(agg, { label: 'Sample session (simulated hands)', sample: true, group: 'isample' })
+        .forEach(d => state.docs.set(d.id, Object.assign({ _id: d.id }, d.data)));
+      rebuild();
+      render();
+    } catch (e) { /* the empty state still offers the sample button */ }
   }
 
   function writeError(e) {
@@ -836,7 +851,7 @@ table.pos-table { width: 100%; border-collapse: collapse; font-variant-numeric: 
   function renderBanner() {
     const b = $('#banner');
     let msg = '', info = false;
-    if (state.dbState === 'unavailable') msg = 'Not saving. This copy of the page can’t reach its storage, so anything you import lasts until you close it. Open the page on claude.ai to keep your stats.';
+    if (state.dbState === 'unavailable') { msg = 'Demo mode: you’re looking at a simulated sample session. You can import your own hand histories too, but they stay in this browser tab and aren’t saved.'; info = true; }
     else if (state.dbState === 'slow') msg = 'Can’t reach your saved stats yet. They will appear as soon as the connection comes back.';
     else if (state.dbState === 'cached') { msg = 'Showing your last saved copy while the page reconnects.'; info = true; }
     else if (state.dbState === 'error') msg = 'Your saved stats couldn’t be loaded. Reload the page to try again.';

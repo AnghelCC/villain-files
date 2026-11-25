@@ -7,10 +7,13 @@ A No-Limit Hold'em cash-game study tool with two parts:
 
 It's built for studying **after** you play. It never connects to a poker client or reads live tables. Online poker sites restrict third-party software, so check your site's terms before using any tracker.
 
-## Live app
+## Try it
 
-The app runs as a private Claude artifact: https://claude.ai/artifact/7zSattLeaeCqisecKR64Ah
-Only people the owner shares it with (from the artifact's Share menu) can open it. Imports and notes are saved in the artifact's own storage.
+**Public demo (no account needed): https://anghelcc.github.io/villain-files/**
+
+The demo opens with a simulated 700-hand sample session. You can import your own hand histories there too; they stay in your browser tab and are never uploaded or saved.
+
+The owner's saved version runs as a Claude artifact (https://claude.ai/artifact/7zSattLeaeCqisecKR64Ah), where imports and notes are kept in the artifact's own storage. Only people the owner shares it with can open that one.
 
 ## Files
 
@@ -24,6 +27,8 @@ Only people the owner shares it with (from the artifact's Share menu) can open i
 | `tools/rank_hands.js` | Ranks the 169 starting hands by equity against a random hand |
 | `tools/test_engine.js` | Parser and stats tests (hand-built edge cases plus the full sample) |
 | `tools/test_odds.js` | Evaluator, equity, narrowing and decision-maths tests |
+| `tools/build_site.py` | Builds the public website into `docs/` |
+| `docs/` | The built website served by GitHub Pages |
 
 ## How the numbers are worked out
 
@@ -50,12 +55,18 @@ Regenerate the simulated session (the seed makes it repeatable):
 python tools/make_sample.py --hands 700 --seed 7 --out sample-session.txt
 ```
 
-## Running it locally
+## Building the website
 
-`index.html` is written as page content for a Claude artifact, which adds the HTML document wrapper when it's published. To try it locally, serve the folder and open it in a browser:
+`index.html` is written as page content for a Claude artifact, which adds the HTML document wrapper when it's published. `tools/build_site.py` adds that wrapper and copies everything the site needs into `docs/`, which GitHub Pages serves:
 
 ```
-python -m http.server 8000
+python tools/build_site.py
 ```
 
-Then go to http://localhost:8000. Locally the app works for the visit but doesn't save, because saving uses the artifact's storage.
+Run it again after changing `index.html`, `engine.js` or `odds.js`, then commit `docs/`.
+
+To try the site locally, serve `docs/` and open http://localhost:8000:
+
+```
+python -m http.server 8000 --directory docs
+```
