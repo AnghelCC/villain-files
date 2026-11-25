@@ -94,6 +94,37 @@ ok('outs for AhQh on Kh7h2c: 9 hearts + 3 aces + 3 queens', o.n === 15, `${o.n} 
   ok('flush draw detected', fdShape.flushDraw && fdShape.made === 0);
 }
 
+// Hand probabilities: exact counts against textbook combinatorics
+{
+  const F = 19600; // possible flops from 50 unseen cards
+  const exactly = (label, got, want) => ok(label, Math.abs(got - want) < 1e-9, `${(got * 100).toFixed(3)}% (expected ${(want * 100).toFixed(3)}%)`);
+  const pp = O.flopOdds(O.parseCards('7c 7d'));
+  // A seven on the flop (1 - C(48,3)/C(50,3)), plus trips on the board (48 flops) giving a full house.
+  exactly('77 flops a set or better', pp.cats.slice(3).reduce((a, b) => a + b, 0), (F - 17296 + 48) / F);
+  const suited = O.flopOdds(O.parseCards('Ah Kh'));
+  exactly('suited cards flop a flush: C(11,3)/C(50,3)', suited.cats[5] + suited.cats[8], 165 / F);
+  exactly('suited cards flop a flush draw: C(11,2)·39/C(50,3)', suited.flushDraw, 2145 / F);
+  const ako = O.flopOdds(O.parseCards('Ah Kd'));
+  // An ace or king on the flop (1 - C(44,3)/C(50,3)), plus QJT flops (64) making a straight.
+  exactly('AKo flops a pair or better', ako.cats.slice(1).reduce((a, b) => a + b, 0), (F - 13244 + 64) / F);
+  const jt = O.flopOdds(O.parseCards('Js Td'));
+  exactly('JTo flops a straight: 4 rank sets × 64', jt.cats[4], 256 / F);
+  const st = O.startingInfo(O.card('Ah'), O.card('Qh'));
+  ok('AQs is dealt 4 times in 1,326', st.combos === 4 && Math.abs(st.dealt - 4 / 1326) < 1e-12, `rank ${st.rank}, top ${(st.atLeast * 100).toFixed(1)}%`);
+  const nx = O.nextCardOdds(O.parseCards('Ah Qh'), O.parseCards('Kh 7h 2c'));
+  exactly('AhQh on Kh7h2c improves on the turn 15 times in 47', nx.improve, 15 / 47);
+  const rv = O.riverOdds(O.parseCards('Ah Qh'), O.parseCards('Kh 7h 2c'));
+  ok('flop-to-river odds are exact (1,081 runouts)', rv.exact && rv.n === 1081);
+  exactly('flush by the river from a flush draw', rv.cats[5] + rv.cats[8], (1081 - 703) / 1081);
+  const pre = O.riverOdds(O.parseCards('Ah Kh'), []);
+  ok('preflop-to-river flush with suited cards ≈ 6.4% (simulated)', Math.abs(pre.cats[5] + pre.cats[8] - 0.0640) < 0.004, `${((pre.cats[5] + pre.cats[8]) * 100).toFixed(2)}%`);
+  const ah = O.aheadNow(O.parseCards('7c 7d'), O.parseCards('7h 2s 2d'), O.topRange(100));
+  ok('full house is ahead of almost every hand', ah.ahead > 0.99 && Math.abs(ah.ahead + ah.tie + ah.behind - 1) < 1e-9, `ahead ${(ah.ahead * 100).toFixed(2)}%`);
+  ok('describes a flush draw with overcards', O.describeHand(O.parseCards('Ah Qh'), O.parseCards('Kh 7h 2c')) === 'One overcard + flush draw');
+  ok('describes a set', O.describeHand(O.parseCards('7c 7d'), O.parseCards('7h Ks 2d')) === 'Set');
+  ok('describes top pair', O.describeHand(O.parseCards('Kc Qd'), O.parseCards('Kh 7s 2d')) === 'Top pair');
+}
+
 // Pot odds and EV
 const po = O.potOdds(15, 5);
 ok('5 to call into 15 needs 25%', Math.abs(po.needed - 0.25) < 1e-9);

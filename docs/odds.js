@@ -366,10 +366,156 @@
     return { pct: range.pct, combos: keep, classes: range.classes, narrowed: (range.narrowed || []).concat([kind]) };
   }
 
+  // ---------------------------------------------------------------------------
+  // Probabilities for your own hand. A hand counts as "made with your cards"
+  // only if your hole cards make it better than the board alone.
+  // ---------------------------------------------------------------------------
+  function madeCat(hero, board) {
+    const s = score(hero.concat(board));
+    const cat = category(s);
+    if (board.length >= 5) return s > score(board) ? cat : 0;
+    return cat > boardCat(board) ? cat : 0;
+  }
+
+  function startingInfo(c1, c2) {
+    const cls = classOf(c1, c2);
+    const size = k => (k.length === 2 ? 6 : k[2] === 's' ? 4 : 12);
+    let atLeast = 0;
+    for (const k of ORDER) { atLeast += size(k); if (k === cls) break; }
+    return { cls, combos: size(cls), dealt: size(cls) / 1326, rank: ORDER.indexOf(cls) + 1, atLeast: atLeast / 1326,
+      kind: cls.length === 2 ? 'pocket pair' : cls[2] === 's' ? 'suited' : 'offsuit' };
+  }
+
+  function deckWithout(cards) {
+    const used = new Set(cards);
+    const deck = [];
+    for (let c = 0; c < 52; c++) if (!used.has(c)) deck.push(c);
+    return deck;
+  }
+
+  // Every possible flop (19,600 of them): made-hand categories and draws.
+  function flopOdds(hero) {
+    const deck = deckWithout(hero);
+    const cats = new Float64Array(9);
+    let fd = 0, oe = 0, gs = 0, n = 0;
+    const b = [0, 0, 0];
+    for (let i = 0; i < deck.length; i++) {
+      for (let j = i + 1; j < deck.length; j++) {
+        for (let k = j + 1; k < deck.length; k++) {
+          b[0] = deck[i]; b[1] = deck[j]; b[2] = deck[k];
+          cats[madeCat(hero, b)]++;
+          const sh = handShape(hero, b);
+          if (sh.flushDraw) fd++;
+          if (sh.straightOuts >= 2) oe++; else if (sh.straightOuts === 1) gs++;
+          n++;
+        }
+      }
+    }
+    return { n, cats: Array.from(cats, v => v / n), flushDraw: fd / n, straightDraw: oe / n, gutshot: gs / n };
+  }
+
+  // Made-hand categories by the river from the current board.
+  // Exact when two or fewer cards are to come, simulated otherwise.
+  function riverOdds(hero, board, trials) {
+    const deck = deckWithout(hero.concat(board));
+    const need = 5 - board.length;
+    const cats = new Float64Array(9);
+    let n = 0;
+    if (need <= 2) {
+      if (need === 0) { cats[madeCat(hero, board)]++; n = 1; }
+      else if (need === 1) { for (const c of deck) { cats[madeCat(hero, board.concat([c]))]++; n++; } }
+      else {
+        for (let i = 0; i < deck.length; i++) for (let j = i + 1; j < deck.length; j++) {
+          cats[madeCat(hero, board.concat([deck[i], deck[j]]))]++; n++;
+        }
+      }
+      return { exact: true, n, cats: Array.from(cats, v => v / n) };
+    }
+    const rng = mulberry32(hero[0] * 131 + hero[1] * 7 + board.length);
+    trials = trials || 60000;
+    const pick = new Int32Array(need);
+    for (let t = 0; t < trials; t++) {
+      for (let k = 0; k < need; k++) {
+        let c, dup;
+        do {
+          c = deck[(rng() * deck.length) | 0];
+          dup = false;
+          for (let m = 0; m < k; m++) if (pick[m] === c) { dup = true; break; }
+        } while (dup);
+        pick[k] = c;
+      }
+      cats[madeCat(hero, board.concat(Array.from(pick)))]++;
+      n++;
+    }
+    return { exact: false, n, cats: Array.from(cats, v => v / n) };
+  }
+
+  // The next card: what it gives you, and how often it improves your hand.
+  function nextCardOdds(hero, board) {
+    if (board.length < 3 || board.length > 4) return null;
+    const deck = deckWithout(hero.concat(board));
+    const now = madeCat(hero, board);
+    const cats = new Float64Array(9);
+    let improve = 0;
+    for (const c of deck) {
+      const m = madeCat(hero, board.concat([c]));
+      cats[m]++;
+      if (m > now) improve++;
+    }
+    return { now, cards: deck.length, improveCount: improve, improve: improve / deck.length, cats: Array.from(cats, v => v / deck.length) };
+  }
+
+  // Against a range, right now: how many of their hands you beat, tie and lose to.
+  function aheadNow(hero, board, range) {
+    if (board.length < 3) return null;
+    const used = new Set(hero.concat(board));
+    const hs = score(hero.concat(board));
+    let a = 0, t = 0, b = 0;
+    for (const cb of range.combos) {
+      if (used.has(cb[0]) || used.has(cb[1])) continue;
+      const s = score([cb[0], cb[1]].concat(board));
+      if (hs > s) a++; else if (hs === s) t++; else b++;
+    }
+    const n = a + t + b;
+    return n ? { ahead: a / n, tie: t / n, behind: b / n, n } : null;
+  }
+
+  // Plain-English description of what you hold.
+  function describeHand(hero, board) {
+    if (board.length < 3) {
+      const info = startingInfo(hero[0], hero[1]);
+      return `${info.cls}, ${info.kind}`;
+    }
+    const m = madeCat(hero, board);
+    const sh = handShape(hero, board);
+    const hr = hero.map(c => c >> 2);
+    const br = Array.from(new Set(board.map(c => c >> 2))).sort((x, y) => y - x);
+    const top = br[0];
+    let made;
+    if (m === 0) {
+      const over = hr.filter(r => r > top).length;
+      made = over === 2 ? 'Two overcards' : over === 1 ? 'One overcard' : 'No pair of your own';
+    } else if (m === 1) {
+      if (hr[0] === hr[1]) made = hr[0] > top ? 'Overpair' : 'Pocket pair under the top card';
+      else {
+        const p = br.indexOf(hr[0]) >= 0 ? hr[0] : hr[1];
+        made = p === top ? 'Top pair' : p === br[1] ? 'Middle pair' : 'Bottom pair';
+      }
+    } else if (m === 3) made = hr[0] === hr[1] ? 'Set' : 'Trips';
+    else made = CATS[m];
+    const draws = [];
+    if (board.length < 5) {
+      if (sh.flushDraw) draws.push('flush draw');
+      if (sh.straightOuts >= 2) draws.push('open-ended straight draw');
+      else if (sh.straightOuts === 1) draws.push('gutshot straight draw');
+    }
+    return made + (draws.length ? ' + ' + draws.join(' + ') : '');
+  }
+
   const ODDS = {
     RANKS, SUITS, CATS, ORDER, card, cardStr, parseCards, score, category, classOf, classCombos,
     topRange, percentile, mulberry32, equity, equityAsync, potOdds, evCall, verdict, outs, pctStr,
-    handShape, narrowRange
+    handShape, narrowRange, madeCat, startingInfo, flopOdds, riverOdds, nextCardOdds, aheadNow, describeHand
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = ODDS;
   else root.ODDS = ODDS;

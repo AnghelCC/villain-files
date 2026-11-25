@@ -151,6 +151,21 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .grade { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; align-self: start;
   border: 1px solid currentColor; }
 .g-good { color: var(--pos); } .g-bad { color: var(--neg); } .g-warn { color: var(--warn); } .g-info { color: var(--muted); }
+.hand-now { font-size: 17px; }
+.hand-now b { font: 700 22px/1.2 var(--font-display); text-transform: uppercase; letter-spacing: 0.02em; }
+.hand-block { display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); container-type: inline-size; }
+.ptable { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 7rem) 4.2rem 5rem; gap: 6px 10px; align-items: center; font-size: 14px; }
+.ptable .b { height: 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); position: relative; overflow: hidden; }
+.ptable .b span { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 999px; }
+.ptable .b i { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--fg); }
+.ptable .p { text-align: right; font: 600 14px var(--font-mono); font-variant-numeric: tabular-nums; }
+.ptable .o { text-align: right; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ptable .sum { font-weight: 600; }
+.ptable .dim { color: var(--muted); }
+@container (max-width: 400px) {
+  .ptable { grid-template-columns: minmax(0, 1fr) 3.8rem 4.6rem; }
+  .ptable .b { display: none; }
+}
 .method { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; }
 .method li::marker { color: var(--accent); font-weight: 700; }
 
@@ -548,6 +563,12 @@ table.pos-table { width: 100%; border-collapse: collapse; font-variant-numeric: 
     </div>
 
     <div class="panel">
+      <h3>Probabilities for your hand</h3>
+      <p class="muted small">Uses the cards you picked above. A hand only counts if your own cards make it, not the board alone. Counted exactly over every possible card, except where marked as simulated.</p>
+      <div id="hand-result"></div>
+    </div>
+
+    <div class="panel">
       <h3>Replay a hand</h3>
       <p class="muted small">Paste one hand from a hand history. Each of your decisions is checked against the odds using only what you knew at that moment: your cards, the board, the price and each opponent's likely range. Opponents you've tracked for 30+ hands get ranges from their real stats.</p>
       <textarea id="replay-text" placeholder="Poker Hand #HD…: Hold'em No Limit ($0.05/$0.1) - …"></textarea>
@@ -564,6 +585,7 @@ table.pos-table { width: 100%; border-collapse: collapse; font-variant-numeric: 
         <li><b>Hand strength.</b> Every 5-to-7-card hand gets one score: its category (pair, flush…) times 13<sup>5</sup>, plus its kickers in base 13. Comparing two hands is then comparing two numbers.</li>
         <li><b>Equity</b> is your share of the pot if all the cards were dealt out with no more betting. It's estimated by Monte Carlo simulation: deal each opponent a hand from their range (skipping hands that clash with cards already seen), deal the rest of the board at random, and count wins and split pots. 30,000 simulated hands give an error of about ±0.3 points. Results were checked against exact enumeration of every runout; for example JTs vs 22 comes out at 54.0% both ways.</li>
         <li><b>Ranges.</b> The 169 starting hands are ranked by their equity against one random hand. A “top 25%” range takes the best hands until it holds 25% of the 1,326 possible two-card combinations. For a tracked player, a caller gets their VPIP as the range width, a raiser their PFR and a 3-bettor their 3-bet percentage.</li>
+        <li><b>Probabilities for your hand</b> are counted exactly: all 19,600 possible flops, all 47 turn or 46 river cards, and all 1,081 turn-and-river pairs from the flop. Only the preflop-to-river table is simulated, with 60,000 random boards. A hand counts only if your hole cards make it better than the board on its own.</li>
         <li><b>Pot odds.</b> The equity you need to call is <span class="mono">to call ÷ (pot + to call)</span>, where the pot already includes the bet you face.</li>
         <li><b>Expected value</b> of calling, compared with folding: <span class="mono">EV = equity × (pot + to call) − to call</span>. Positive means calling makes money in the long run.</li>
         <li><b>Narrowing after the flop.</b> When an opponent bets, their range keeps only hands that use a hole card to make a pair or better, flush or straight draws, and about 30% of the rest as bluffs. When they raise, it keeps two pair or better, top pair or an overpair, strong draws and about 10% bluffs. Each bet or raise in the hand narrows the range again on that street's board.</li>
@@ -1393,9 +1415,10 @@ table.pos-table { width: 100%; border-collapse: collapse; font-variant-numeric: 
     if (calc.run) calc.run.cancel();
     const sp = spot();
     const box = $('#calc-result');
-    if (sp.error) { box.replaceChildren(el('p', { class: 'muted' }, sp.error)); return; }
+    if (sp.error) { box.replaceChildren(el('p', { class: 'muted' }, sp.error)); renderHandOdds(sp, null); return; }
     let range = ODDS.topRange(sp.pct);
     if (sp.post) range = ODDS.narrowRange(range, sp.board, sp.post);
+    renderHandOdds(sp, range);
     const ranges = Array.from({ length: sp.opp }, () => range);
     const token = {};
     calc.token = token;
@@ -1449,17 +1472,131 @@ table.pos-table { width: 100%; border-collapse: collapse; font-variant-numeric: 
     parts.push(el('p', { class: 'muted small' },
       `${sp.opp === 1 ? 'Opponent' : sp.opp + ' opponents, each'}: top ${sp.pct}% of hands, ${full.classes.length} starting hands (${full.combos.length} combos): ${head}${tail}.` +
       (range.narrowed ? ` After their ${sp.post === 'raise' ? 'raise' : 'bet'}, ${range.combos.length} combos are left: made hands, draws and some bluffs.` : '')));
-    if (sp.board.length < 5) {
-      const rows = res.cats.map((x, i) => ({ x, i })).filter(r => r.x >= 0.005).sort((a, b) => b.i - a.i);
-      parts.push(el('div', null,
-        el('span', { class: 'eyebrow' }, 'What you finish with by the river'),
-        el('div', { class: 'cats', style: 'margin-top:8px' }, rows.map(r => {
-          const s = el('span');
-          s.style.width = Math.min(100, r.x * 100) + '%';
-          return [el('span', null, ODDS.CATS[r.i]), el('span', { class: 'b' }, s), el('span', { class: 'p' }, P(r.x))];
-        }))));
-    }
     box.replaceChildren(el('div', { class: 'form', style: 'gap:14px;border-top:1px solid var(--line);padding-top:14px' }, parts));
+  }
+
+  // ---------- Probabilities for your hand ----------
+  const handCache = new Map();
+  const multi = { key: null, token: null, rows: [] };
+  function cached(key, fn) {
+    if (!handCache.has(key)) {
+      if (handCache.size > 40) handCache.clear();
+      handCache.set(key, fn());
+    }
+    return handCache.get(key);
+  }
+  function oneIn(p) {
+    if (!(p > 0)) return 'never';
+    if (p >= 0.995) return 'always';
+    const n = 1 / p;
+    return n < 10 ? `1 in ${n.toFixed(1)}` : `1 in ${Math.round(n).toLocaleString('en-GB')}`;
+  }
+  function probTable(rows) {
+    return el('div', { class: 'ptable' }, rows.map(r => {
+      const bar = el('span', { class: 'b' });
+      const fill = el('span');
+      fill.style.width = Math.min(100, r.p * 100) + '%';
+      bar.append(fill);
+      if (r.mark != null) { const m = el('i'); m.style.left = Math.min(100, r.mark * 100) + '%'; bar.append(m); }
+      const cls = r.sum ? 'sum' : r.dim ? 'dim' : '';
+      return [el('span', { class: cls }, r.label), bar, el('span', { class: 'p ' + cls }, r.p > 0 && r.p < 0.001 ? '<0.1%' : P(r.p)), el('span', { class: 'o' }, r.odds || oneIn(r.p))];
+    }));
+  }
+  function catRows(cats, opts) {
+    const order = [8, 7, 6, 5, 4, 3, 2, 1];
+    const rows = order.filter(i => cats[i] > 0).map(i => ({ label: ODDS.CATS[i], p: cats[i] }));
+    const any = cats.slice(1).reduce((a, b) => a + b, 0);
+    rows.push({ label: (opts && opts.anyLabel) || 'Pair or better', p: any, sum: true });
+    rows.push({ label: 'Nothing made with your cards', p: cats[0], dim: true });
+    return rows;
+  }
+  function block(title, ...kids) {
+    return el('div', { class: 'hand-block' }, el('span', { class: 'eyebrow' }, title), kids);
+  }
+
+  function renderHandOdds(sp, range) {
+    const box = $('#hand-result');
+    if (!sp || sp.error) {
+      box.replaceChildren(el('p', { class: 'muted' }, sp && sp.error ? sp.error : 'Choose your two cards above.'));
+      return;
+    }
+    const { hero, board } = sp;
+    const key = hero.concat(board).join(',');
+    const info = ODDS.startingInfo(hero[0], hero[1]);
+    const street = ['preflop', '', '', 'on the flop', 'on the turn', 'on the river'][board.length];
+    const parts = [];
+    parts.push(el('p', { class: 'hand-now' }, el('b', null, ODDS.describeHand(hero, board)), ' ',
+      el('span', { class: 'muted' }, board.length
+        ? street
+        : `· number ${info.rank} of 169 starting hands, top ${Math.max(1, Math.round(info.atLeast * 100))}%`)));
+
+    if (!board.length) {
+      parts.push(el('dl', { class: 'facts' },
+        fact(`Chance of being dealt ${info.cls}`, `${P(info.dealt)} · ${oneIn(info.dealt)}`),
+        fact(`Dealt ${info.cls} or better`, `${P(info.atLeast)} · ${oneIn(info.atLeast)}`)));
+      const f = cached('flop:' + key, () => ODDS.flopOdds(hero));
+      const rows = catRows(f.cats);
+      if (f.flushDraw > 0) rows.push({ label: 'Flush draw', p: f.flushDraw });
+      if (f.straightDraw > 0) rows.push({ label: 'Open-ended straight draw', p: f.straightDraw });
+      if (f.gutshot > 0) rows.push({ label: 'Gutshot straight draw', p: f.gutshot });
+      parts.push(block('On the flop (all 19,600 flops)', probTable(rows)));
+      const r = cached('river:' + key, () => ODDS.riverOdds(hero, []));
+      parts.push(block(`By the river (${r.n.toLocaleString('en-GB')} simulated boards)`, probTable(catRows(r.cats))));
+    } else {
+      if (range) {
+        const a = ODDS.aheadNow(hero, board, range);
+        if (a) {
+          parts.push(block(`Against their range right now (${a.n.toLocaleString('en-GB')} hands)`,
+            probTable([
+              { label: 'You’re ahead', p: a.ahead, odds: '' },
+              { label: 'Tied', p: a.tie, odds: '' },
+              { label: 'You’re behind', p: a.behind, odds: '' }
+            ]),
+            el('p', { class: 'muted small' }, board.length < 5
+              ? 'This compares hands as they stand now. Equity in the calculator also counts the cards still to come, which is why the two numbers differ.'
+              : 'On the river nothing more can change, so this is your real chance of having the best hand against this range.')));
+        }
+      }
+      if (board.length < 5) {
+        const nx = cached('next:' + key, () => ODDS.nextCardOdds(hero, board));
+        parts.push(block(`On the ${board.length === 3 ? 'turn' : 'river'} (all ${nx.cards} possible cards)`,
+          el('p', { class: 'small' }, el('b', null, `${nx.improveCount} of ${nx.cards} cards improve your hand: ${P(nx.improve)}`),
+            el('span', { class: 'muted' }, ` · ${oneIn(nx.improve)}`)),
+          probTable(catRows(nx.cats))));
+        if (board.length === 3) {
+          const r = cached('river:' + key, () => ODDS.riverOdds(hero, board));
+          parts.push(block(`By the river (all ${r.n.toLocaleString('en-GB')} turn and river cards)`, probTable(catRows(r.cats))));
+        }
+      }
+    }
+    const multiBox = el('div', { id: 'multi-box' });
+    parts.push(block('How it holds up against more opponents (any two cards)', multiBox,
+      el('p', { class: 'muted small' }, 'The black line is an equal share of the pot. Above it, your hand is stronger than average at that table size.')));
+    box.replaceChildren(el('div', { class: 'form', style: 'gap:14px' }, parts));
+    renderMulti(key, hero, board);
+  }
+
+  async function renderMulti(key, hero, board) {
+    const draw = () => {
+      const boxEl = $('#multi-box');
+      if (!boxEl) return;
+      boxEl.replaceChildren(probTable(multi.rows.map(r => ({
+        label: `${r.n} ${r.n === 1 ? 'opponent' : 'opponents'}`, p: r.eq, mark: 1 / (r.n + 1),
+        odds: `share ${P(1 / (r.n + 1))}`
+      })).concat(multi.rows.length < 9 ? [{ label: 'Simulating…', p: 0, odds: '', dim: true }] : [])));
+    };
+    if (multi.key === key) { draw(); return; }
+    multi.key = key;
+    multi.rows = [];
+    const token = {};
+    multi.token = token;
+    const any = ODDS.topRange(100);
+    for (let n = 1; n <= 9; n++) {
+      const res = await ODDS.equityAsync({ hero, board, ranges: Array.from({ length: n }, () => any), trials: 6000 });
+      if (multi.token !== token || !res) return;
+      multi.rows.push({ n, eq: res.equity });
+      draw();
+    }
   }
 
   function randomSpot() {

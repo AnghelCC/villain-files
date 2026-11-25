@@ -36,6 +36,7 @@ The owner's saved version runs as a Claude artifact (https://claude.ai/artifact/
 - **Equity:** Monte Carlo simulation with card removal. Each opponent is dealt a hand from their range, the board is completed at random, and wins and split pots are counted. 30,000 trials give about ±0.3 points. Results are checked against exact enumeration of every runout.
 - **Ranges:** the 169 starting hands are ordered by all-in equity against a random hand. "Top X%" takes the best hands until X% of the 1,326 combos is reached. A tracked player's range width comes from their VPIP (caller), PFR (raiser) or 3-bet % (3-bettor).
 - **Narrowing:** after a postflop bet the range keeps made hands, draws and about 30% bluffs; after a raise it keeps two pair or better, top pair or an overpair, strong draws and about 10% bluffs.
+- **Hand probabilities:** exact enumeration of all 19,600 flops, every turn and river card, and all 1,081 turn-and-river pairs from the flop. The preflop-to-river table is simulated with 60,000 boards. A hand counts only if the hole cards make it better than the board alone. Tests check the counts against textbook formulas, for example a pocket pair flopping a set or better 12.0% of the time and a flush draw completing by the river 34.97%.
 - **Pot odds:** the equity needed to call is `to call ÷ (pot + to call)`.
 - **EV of calling:** `equity × (pot + to call) − to call`.
 - **Limits:** equity assumes the hand is checked down. It ignores implied odds, fold equity, position and rake. The narrowing rules are a simple model, not a solver.
