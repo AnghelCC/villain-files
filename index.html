@@ -1,0 +1,1699 @@
+<title>Villain Files</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: phone-first one-column app. Sticky top bar with four views; a player opens in a side sheet (full screen on phones). */
+:root {
+  --bg: #edf1ee;
+  --surface: #ffffff;
+  --surface-2: #f4f7f5;
+  --line: #d3dcd6;
+  --fg: #17211c;
+  --muted: #56665e;
+  --accent: #0d6a4e;
+  --accent-ink: #ffffff;
+  --accent-soft: #d6ebe1;
+  --band: #c4e2d3;
+  --pos: #16794a;
+  --neg: #b4362c;
+  --warn: #a75a00;
+  --scrim: rgba(10, 20, 15, 0.45);
+  --card-bg: #ffffff;
+  --t-nit: #3b62a6; --t-rock: #5d6d84; --t-tag: #1e784b; --t-lag: #a86100;
+  --t-fish: #b9542c; --t-station: #bd2f28; --t-maniac: #8b399d; --t-unknown: #747f79;
+  --suit-s: #17211c; --suit-h: #c62828; --suit-d: #1e5dbd; --suit-c: #1b7a3c;
+  --font-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1412; --surface: #151d1a; --surface-2: #1b2521; --line: #2a3631;
+    --fg: #e3ebe7; --muted: #95a59d; --accent: #4cc392; --accent-ink: #052118;
+    --accent-soft: #173a2d; --band: #20483a; --pos: #4cc392; --neg: #ff7a6e; --warn: #f0a640;
+    --scrim: rgba(0, 0, 0, 0.6); --card-bg: #1f2a26;
+    --t-nit: #82a5e8; --t-rock: #a0aec2; --t-tag: #5fcf93; --t-lag: #f0a640;
+    --t-fish: #f2905f; --t-station: #ff6f66; --t-maniac: #d282e2; --t-unknown: #9ba5a0;
+    --suit-s: #e3ebe7; --suit-h: #ff6b6b; --suit-d: #74a7ff; --suit-c: #63d184;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1412; --surface: #151d1a; --surface-2: #1b2521; --line: #2a3631;
+  --fg: #e3ebe7; --muted: #95a59d; --accent: #4cc392; --accent-ink: #052118;
+  --accent-soft: #173a2d; --band: #20483a; --pos: #4cc392; --neg: #ff7a6e; --warn: #f0a640;
+  --scrim: rgba(0, 0, 0, 0.6); --card-bg: #1f2a26;
+  --t-nit: #82a5e8; --t-rock: #a0aec2; --t-tag: #5fcf93; --t-lag: #f0a640;
+  --t-fish: #f2905f; --t-station: #ff6f66; --t-maniac: #d282e2; --t-unknown: #9ba5a0;
+  --suit-s: #e3ebe7; --suit-h: #ff6b6b; --suit-d: #74a7ff; --suit-c: #63d184;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 400 15px/1.5 var(--font-body); -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--surface);
+}
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h2 { font: 700 24px/1.15 var(--font-display); letter-spacing: 0.01em; text-transform: uppercase; }
+h3 { font: 700 18px/1.2 var(--font-display); letter-spacing: 0.02em; text-transform: uppercase; }
+p { margin: 0; }
+a { color: var(--accent); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Top bar */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand-name { font: 700 23px/1 var(--font-display); letter-spacing: 0.03em; text-transform: uppercase; }
+.brand-sub { font-size: 12px; color: var(--muted); line-height: 1.2; }
+.chipmark { width: 30px; height: 30px; flex: none; color: var(--accent); }
+.tabs { display: flex; gap: 2px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+.tab {
+  font-weight: 600; font-size: 14px; padding: 7px 12px; border-radius: 999px;
+  color: var(--muted); text-decoration: none; white-space: nowrap;
+}
+.tab:hover { color: var(--fg); }
+.tab[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+@media (max-width: 640px) {
+  .tabs { margin-left: 0; width: 100%; justify-content: space-between; }
+  .tab { padding: 6px 8px; font-size: 13.5px; }
+}
+
+/* Odds view */
+.slots { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+.slot-group { display: flex; flex-direction: column; gap: 4px; }
+.slot-row { display: flex; gap: 5px; }
+.slot {
+  width: clamp(34px, 10.5vw, 46px); aspect-ratio: 3 / 4; max-width: 100%; border-radius: 7px;
+  border: 1px dashed var(--muted); background: var(--surface-2); color: var(--muted);
+  font: 600 16px var(--font-mono); display: grid; place-items: center; cursor: pointer; padding: 0;
+}
+.slot.filled { border: 1px solid var(--line); background: var(--card-bg); color: var(--suit, var(--fg)); }
+.slot.active { outline: 2px solid var(--accent); outline-offset: 2px; }
+.picker { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 3px; }
+.pick {
+  height: 34px; min-width: 0; padding: 0; border-radius: 5px; border: 1px solid var(--line);
+  background: var(--card-bg); color: var(--suit, var(--fg)); font: 600 12px var(--font-mono); cursor: pointer;
+}
+.pick:hover:not(:disabled) { border-color: var(--accent); }
+.pick:disabled { opacity: 0.18; cursor: default; }
+.calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 12px; }
+.calc-grid input[type="range"] { width: 100%; accent-color: var(--accent); }
+.verdict-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.verdict { font: 700 30px/1 var(--font-display); text-transform: uppercase; letter-spacing: 0.02em; }
+.v-call, .v-raise, .v-bet { color: var(--pos); }
+.v-fold { color: var(--neg); }
+.v-close, .v-check { color: var(--warn); }
+.eqbar { position: relative; height: 14px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.eqbar .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.eqbar .need { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--fg); }
+.formula { font: 500 12.5px/1.6 var(--font-mono); color: var(--muted); overflow-wrap: anywhere; margin: 0; }
+.cats { display: grid; grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr) 3.4rem; gap: 4px 10px; align-items: center; font-size: 13px; }
+.cats .b { height: 8px; border-radius: 999px; background: var(--band); }
+.cats .b span { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+.cats .p { text-align: right; font-variant-numeric: tabular-nums; }
+.decs { display: flex; flex-direction: column; }
+.dec { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.dec:first-child { border-top: 0; }
+.dec-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.dec-street { font: 700 16px var(--font-display); text-transform: uppercase; letter-spacing: 0.03em; }
+.dec-nums { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.dec-nums b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.grade { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; align-self: start;
+  border: 1px solid currentColor; }
+.g-good { color: var(--pos); } .g-bad { color: var(--neg); } .g-warn { color: var(--warn); } .g-info { color: var(--muted); }
+.method { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; }
+.method li::marker { color: var(--accent); font-weight: 700; }
+
+main { padding-block: 20px 64px; display: flex; flex-direction: column; gap: 16px; }
+section.view { display: flex; flex-direction: column; gap: 16px; }
+
+.banner {
+  display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--line); font-size: 14px;
+}
+.banner::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; background: var(--warn); }
+.banner.info::before { background: var(--accent); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 9px 16px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); font-weight: 600; cursor: pointer; text-decoration: none; color: var(--fg);
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--neg); }
+.btn.danger.armed { background: var(--neg); border-color: var(--neg); color: var(--surface); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.small { padding: 6px 12px; font-size: 13px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+/* Players view */
+.overview { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.overview-line { color: var(--muted); font-size: 14px; }
+.overview-line b { color: var(--fg); font-weight: 600; }
+.targets { display: flex; flex-direction: column; gap: 8px; }
+.target-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.target {
+  display: inline-flex; align-items: center; gap: 10px; padding: 8px 12px 8px 10px;
+  border-radius: 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; text-align: left;
+}
+.target:hover { border-color: var(--muted); }
+.target-rank { font: 700 20px/1 var(--font-display); color: var(--muted); width: 18px; text-align: center; }
+.target-name { font-weight: 600; display: block; line-height: 1.2; }
+.target-why { font-size: 12px; color: var(--muted); display: block; line-height: 1.3; }
+.eyebrow { font: 600 12px/1.2 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label, .field .label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.input, .select, textarea {
+  padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+  min-width: 0;
+}
+.controls .search { flex: 1 1 220px; }
+.controls .field.compact { flex: 0 1 160px; }
+
+.list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.list-head, .row {
+  display: grid; align-items: center; column-gap: 16px; row-gap: 6px;
+  grid-template-columns: minmax(0, 1.25fr) 132px minmax(0, 1.3fr) 76px;
+  grid-template-areas: "name chip hud bb" "tip tip tip tip";
+  padding: 12px 16px;
+}
+.list-head { grid-template-areas: "name chip hud bb"; padding-block: 8px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.list-head span { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.row { width: 100%; border: 0; border-top: 1px solid var(--line); background: transparent; text-align: left; cursor: pointer; }
+.list-head + .row { border-top: 0; }
+.row:hover { background: var(--surface-2); }
+.c-name { grid-area: name; min-width: 0; }
+.c-chip { grid-area: chip; }
+.c-hud { grid-area: hud; min-width: 0; }
+.c-bb { grid-area: bb; text-align: right; }
+.c-tip { grid-area: tip; min-width: 0; font-size: 13px; color: var(--muted); }
+.c-tip b { color: var(--accent); font-weight: 600; }
+.row-name { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-sub { font-size: 12px; color: var(--muted); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.hud span { display: flex; flex-direction: column; line-height: 1.15; }
+.hud b { font: 600 15px var(--font-mono); font-variant-numeric: tabular-nums; }
+.hud i { font-style: normal; font-size: 10px; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; }
+.bb b { font: 600 15px var(--font-mono); display: block; }
+.bb i { font-style: normal; font-size: 10px; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+@media (max-width: 720px) {
+  .list-head { display: none; }
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "name chip" "hud bb" "tip tip";
+  }
+}
+
+.chip {
+  --tc: var(--t-unknown);
+  display: inline-flex; align-items: center; gap: 6px; justify-self: start;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap;
+  padding: 3px 10px 3px 8px; border-radius: 999px; color: var(--tc);
+  background: color-mix(in srgb, var(--tc) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tc) 35%, transparent);
+}
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--tc); }
+.t-nit { --tc: var(--t-nit); } .t-rock { --tc: var(--t-rock); } .t-tag { --tc: var(--t-tag); }
+.t-lag { --tc: var(--t-lag); } .t-fish { --tc: var(--t-fish); } .t-station { --tc: var(--t-station); }
+.t-maniac { --tc: var(--t-maniac); } .t-unknown { --tc: var(--t-unknown); }
+
+.more { padding: 12px; display: flex; justify-content: center; border-top: 1px solid var(--line); }
+
+.empty { padding: 32px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.empty p { max-width: 46ch; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+
+/* Import view */
+.drop {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+  padding: 32px 16px; border: 2px dashed var(--line); border-radius: 12px; background: var(--surface); cursor: pointer;
+}
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.drop-title { font: 700 20px var(--font-display); text-transform: uppercase; letter-spacing: 0.02em; }
+.drop svg { width: 40px; height: 40px; color: var(--accent); }
+details summary { cursor: pointer; font-weight: 600; }
+details[open] summary { margin-bottom: 8px; }
+textarea { width: 100%; min-height: 140px; resize: vertical; font: 500 12px/1.4 var(--font-mono); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; margin: 0; }
+.facts div { display: flex; flex-direction: column; min-width: 0; }
+.facts dt { font-size: 12px; color: var(--muted); font-weight: 600; }
+.facts dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.progress { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.progress span { display: block; height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+
+/* History */
+.imp { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: center; padding: 14px 16px; border-top: 1px solid var(--line); }
+.imp:first-child { border-top: 0; }
+.imp-title { font-weight: 600; overflow-wrap: anywhere; }
+.imp-meta { font-size: 13px; color: var(--muted); }
+.tag-sample { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warn); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; margin-left: 6px; }
+
+/* Sheet */
+.sheet { position: fixed; inset: 0; z-index: 20; display: flex; justify-content: flex-end; background: var(--scrim); }
+.sheet-panel {
+  width: min(620px, 100%); height: 100%; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--bg); display: flex; flex-direction: column; gap: 16px;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 32px) max(16px, env(safe-area-inset-left, 0px));
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.18);
+}
+.sheet-top { display: flex; align-items: flex-start; gap: 12px; }
+.sheet-top .who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.who-name { font: 700 30px/1.05 var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; overflow-wrap: anywhere; }
+.who-line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--muted); }
+.close { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; }
+.close svg { width: 18px; height: 18px; }
+.bighud { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.bighud div { padding: 10px 8px; text-align: center; border-left: 1px solid var(--line); }
+.bighud div:first-child { border-left: 0; }
+.bighud b { display: block; font: 600 22px/1.1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.bighud i { font-style: normal; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.plays { margin: 0; padding: 0; list-style: none; counter-reset: play; display: flex; flex-direction: column; gap: 10px; }
+.plays li { counter-increment: play; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 10px; }
+.plays li::before {
+  content: counter(play); grid-row: span 2; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font: 700 14px var(--font-display);
+}
+.plays .why { font-size: 12px; color: var(--muted); }
+.stats { container-type: inline-size; display: flex; flex-direction: column; }
+.stat {
+  display: grid; align-items: center; gap: 4px 14px;
+  grid-template-columns: minmax(0, 10.5rem) minmax(0, 1fr) 4.2rem;
+  grid-template-areas: "label bar val" "label meta val";
+  padding: 9px 0; border-top: 1px solid var(--line);
+}
+.stat:first-of-type { border-top: 0; }
+.stat-label { grid-area: label; font-weight: 600; font-size: 14px; line-height: 1.25; }
+.stat-label small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.stat-bar { grid-area: bar; }
+.stat-meta { grid-area: meta; font-size: 12px; color: var(--muted); }
+.stat-val { grid-area: val; text-align: right; font: 600 18px var(--font-mono); font-variant-numeric: tabular-nums; }
+.stat-val.dim { color: var(--muted); }
+@container (max-width: 430px) {
+  .stat { grid-template-columns: minmax(0, 1fr) 4rem; grid-template-areas: "label val" "bar bar" "meta meta"; }
+}
+.bar { position: relative; height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.bar-band { position: absolute; top: 0; bottom: 0; background: var(--band); border-radius: 999px; }
+.bar-dot {
+  position: absolute; top: 50%; width: 14px; height: 14px; margin-left: -7px; transform: translateY(-50%);
+  border-radius: 50%; background: var(--fg); border: 2px solid var(--surface);
+}
+.bar-dot.out { background: var(--warn); }
+.bar-dot.low { opacity: 0.4; }
+table.pos-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+.pos-table th, .pos-table td { padding: 6px 8px; text-align: right; border-top: 1px solid var(--line); }
+.pos-table th:first-child, .pos-table td:first-child { text-align: left; }
+.pos-table thead th { border-top: 0; font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.scroll-x { overflow-x: auto; }
+.sd { display: flex; flex-direction: column; }
+.sd-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.sd-item:first-child { border-top: 0; }
+.sd-line { font-size: 13px; min-width: 0; }
+.sd-line .muted { display: block; }
+.cards { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.card {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 38px; padding: 0 4px;
+  border-radius: 5px; background: var(--card-bg); border: 1px solid var(--line);
+  font: 600 15px var(--font-mono); color: var(--suit, var(--fg)); letter-spacing: -0.02em;
+}
+.cards.board .card { min-width: 24px; height: 28px; font-size: 12px; }
+.s-s { --suit: var(--suit-s); } .s-h { --suit: var(--suit-h); } .s-d { --suit: var(--suit-d); } .s-c { --suit: var(--suit-c); }
+.form { display: flex; flex-direction: column; gap: 10px; }
+.form .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.saved { font-size: 13px; color: var(--muted); }
+.note-box { font-size: 13px; color: var(--muted); }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); transform: translateX(-50%);
+  z-index: 30; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 10px;
+  background: var(--fg); color: var(--bg); font-size: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="chipmark" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="3"/>
+        <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="4.4 6.6" opacity="0.55"/>
+        <circle cx="16" cy="16" r="7" fill="currentColor"/>
+      </svg>
+      <div>
+        <div class="brand-name">Villain Files</div>
+        <div class="brand-sub">NL Hold'em cash · reads from your hand histories</div>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <a class="tab" href="#players" data-view="players">Players</a>
+      <a class="tab" href="#import" data-view="import">Import</a>
+      <a class="tab" href="#history" data-view="history">Imports</a>
+      <a class="tab" href="#my-game" data-view="my-game">My game</a>
+      <a class="tab" href="#odds" data-view="odds">Odds</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner" class="banner" role="status" hidden></div>
+
+  <section id="view-players" class="view" aria-labelledby="h-players">
+    <div class="overview">
+      <h2 id="h-players">Opponents</h2>
+      <p id="overview-line" class="overview-line">Loading your stats…</p>
+    </div>
+    <div id="targets" class="targets" hidden>
+      <span class="eyebrow">Best targets</span>
+      <div id="target-list" class="target-list"></div>
+    </div>
+    <div class="controls" id="controls">
+      <div class="field search">
+        <label for="q">Search</label>
+        <input id="q" class="input" type="search" placeholder="Player code or name" autocomplete="off">
+      </div>
+      <div class="field compact">
+        <label for="min">Sample</label>
+        <select id="min" class="select">
+          <option value="0">All players</option>
+          <option value="10" selected>10+ hands</option>
+          <option value="30">30+ hands</option>
+          <option value="100">100+ hands</option>
+          <option value="300">300+ hands</option>
+        </select>
+      </div>
+      <div class="field compact">
+        <label for="sort">Sort by</label>
+        <select id="sort" class="select">
+          <option value="hands">Most hands</option>
+          <option value="target">Best targets</option>
+          <option value="vpip">Loosest</option>
+          <option value="af">Most aggressive</option>
+          <option value="recent">Recently seen</option>
+        </select>
+      </div>
+    </div>
+    <div id="players-body"></div>
+    <p class="legend">
+      <span><b>VPIP</b> plays a hand</span><span><b>PFR</b> raises preflop</span><span><b>3B</b> 3-bets</span>
+      <span><b>AF</b> postflop aggression</span><span><b>SD</b> went to showdown</span>
+      <span>Dimmed numbers have too few hands to trust yet.</span>
+    </p>
+  </section>
+
+  <section id="view-import" class="view" aria-labelledby="h-import" hidden>
+    <h2 id="h-import">Add hand histories</h2>
+    <label class="drop" id="drop" for="file">
+      <svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="7" y="5" width="26" height="30" rx="3"/><path d="M13 14h14M13 20h14M13 26h8"/>
+      </svg>
+      <span class="drop-title">Drop hand history files here</span>
+      <span class="muted">or tap to choose · .zip from PokerCraft or .txt files</span>
+      <input id="file" type="file" accept=".txt,.zip,text/plain,application/zip" multiple>
+    </label>
+    <details class="panel" id="paste-box">
+      <summary>Paste hand history text instead</summary>
+      <div class="form">
+        <textarea id="paste" placeholder="Poker Hand #HD…: Hold'em No Limit ($0.05/$0.1) - …"></textarea>
+        <div class="actions"><button class="btn" id="paste-go" type="button">Read pasted hands</button></div>
+      </div>
+    </details>
+    <div id="import-result"></div>
+    <div class="two">
+      <div class="panel">
+        <h3>Getting your hand histories</h3>
+        <ol class="steps">
+          <li>In the PlayGG client, open <b>PokerCraft</b>.</li>
+          <li>Find your cash game sessions and use the option to download their hand histories.</li>
+          <li>Upload the .zip here as it is. No need to unzip it.</li>
+        </ol>
+        <p class="muted small">Hands you've already added are skipped automatically, so it's safe to upload overlapping files.</p>
+        <p class="muted small">GG files often show opponents as 8-character codes instead of screen names. Open a player and add the name you see at the table. The sessions count on each player shows whether the same code comes back in later imports.</p>
+      </div>
+      <div class="panel">
+        <h3>Use it after you play</h3>
+        <p class="small">In October 2026 GGPoker tightened its rules on third-party software, and tracking tools are named in the change. This page never connects to the poker client, but check PlayGG's current terms before you rely on it, and keep it closed while your tables are open.</p>
+        <p class="muted small">No hand histories to hand? Try the sample session: 700 simulated hands at $0.05/$0.10 with nine very different opponents. It's marked as a sample so you can delete it later.</p>
+        <div class="actions"><button class="btn" type="button" data-action="sample">Load the sample session</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-history" class="view" aria-labelledby="h-history" hidden>
+    <h2 id="h-history">Imports</h2>
+    <p class="muted">Every import is kept on its own, so you can remove one without touching the rest. Player stats update straight away.</p>
+    <div id="history-body"></div>
+  </section>
+
+  <section id="view-my-game" class="view" aria-labelledby="h-mygame" hidden>
+    <h2 id="h-mygame">My game</h2>
+    <div id="mygame-body"></div>
+  </section>
+
+  <section id="view-odds" class="view" aria-labelledby="h-odds" hidden>
+    <div class="overview">
+      <h2 id="h-odds">Odds</h2>
+      <p class="overview-line">Is a call, bet or fold profitable? Enter a spot, or replay a hand you played.</p>
+    </div>
+    <div class="panel">
+      <h3>Spot calculator</h3>
+      <div class="slots" id="slots"></div>
+      <p class="muted small">Tap a slot, then a card. Tap a highlighted slot again to empty it.</p>
+      <div class="picker" id="picker" aria-label="Choose a card"></div>
+      <div class="actions">
+        <button class="btn small" type="button" id="clear-cards">Clear cards</button>
+        <button class="btn small" type="button" id="random-spot">Random spot</button>
+      </div>
+      <div class="calc-grid">
+        <div class="field">
+          <label for="c-opp">Opponents in the hand</label>
+          <select id="c-opp" class="select">
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="c-range">Their range</label>
+          <select id="c-range" class="select"></select>
+        </div>
+        <div class="field" id="c-action-field" hidden>
+          <label for="c-action">What they did preflop</label>
+          <select id="c-action" class="select">
+            <option value="call">Called or limped (VPIP range)</option>
+            <option value="raise">Raised (PFR range)</option>
+            <option value="3bet">3-bet (3-bet range)</option>
+          </select>
+        </div>
+        <div class="field" id="c-post-field" hidden>
+          <label for="c-post">Their action on this street</label>
+          <select id="c-post" class="select">
+            <option value="">Checked or not acted yet</option>
+            <option value="bet">Bet</option>
+            <option value="raise">Raised or check-raised</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="c-pct">Range width: <span id="c-pct-out" class="num">25%</span> of hands</label>
+          <input id="c-pct" type="range" min="2" max="100" step="1" value="25">
+        </div>
+        <div class="field">
+          <label for="c-pot">Pot, including their bet (bb)</label>
+          <input id="c-pot" class="input num" type="number" min="0" step="0.5" value="10" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label for="c-call">To call (bb, 0 if no bet)</label>
+          <input id="c-call" class="input num" type="number" min="0" step="0.5" value="4" inputmode="decimal">
+        </div>
+      </div>
+      <div id="calc-result" aria-live="polite"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Replay a hand</h3>
+      <p class="muted small">Paste one hand from a hand history. Each of your decisions is checked against the odds using only what you knew at that moment: your cards, the board, the price and each opponent's likely range. Opponents you've tracked for 30+ hands get ranges from their real stats.</p>
+      <textarea id="replay-text" placeholder="Poker Hand #HD…: Hold'em No Limit ($0.05/$0.1) - …"></textarea>
+      <div class="actions">
+        <button class="btn primary" type="button" id="replay-go">Check my decisions</button>
+        <button class="btn" type="button" id="replay-sample">Random hand from the sample</button>
+      </div>
+      <div id="replay-result"></div>
+    </div>
+
+    <div class="panel">
+      <h3>How the numbers are worked out</h3>
+      <ol class="method">
+        <li><b>Hand strength.</b> Every 5-to-7-card hand gets one score: its category (pair, flush…) times 13<sup>5</sup>, plus its kickers in base 13. Comparing two hands is then comparing two numbers.</li>
+        <li><b>Equity</b> is your share of the pot if all the cards were dealt out with no more betting. It's estimated by Monte Carlo simulation: deal each opponent a hand from their range (skipping hands that clash with cards already seen), deal the rest of the board at random, and count wins and split pots. 30,000 simulated hands give an error of about ±0.3 points. Results were checked against exact enumeration of every runout; for example JTs vs 22 comes out at 54.0% both ways.</li>
+        <li><b>Ranges.</b> The 169 starting hands are ranked by their equity against one random hand. A “top 25%” range takes the best hands until it holds 25% of the 1,326 possible two-card combinations. For a tracked player, a caller gets their VPIP as the range width, a raiser their PFR and a 3-bettor their 3-bet percentage.</li>
+        <li><b>Pot odds.</b> The equity you need to call is <span class="mono">to call ÷ (pot + to call)</span>, where the pot already includes the bet you face.</li>
+        <li><b>Expected value</b> of calling, compared with folding: <span class="mono">EV = equity × (pot + to call) − to call</span>. Positive means calling makes money in the long run.</li>
+        <li><b>Narrowing after the flop.</b> When an opponent bets, their range keeps only hands that use a hole card to make a pair or better, flush or straight draws, and about 30% of the rest as bluffs. When they raise, it keeps two pair or better, top pair or an overpair, strong draws and about 10% bluffs. Each bet or raise in the hand narrows the range again on that street's board.</li>
+        <li><b>Limits.</b> Equity assumes the hand is checked down from here. It ignores money won or lost on later streets (implied odds), the chance your bet makes them fold (fold equity), position and rake. The narrowing rules are a simple model of real ranges, not a solver. Treat close spots (within 3 points) as judgment calls.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-panel" id="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-name" tabindex="-1"></div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="engine.js"></script>
+<script src="odds.js"></script>
+<script>
+(function () {
+  'use strict';
+  const VF = window.VF;
+  const $ = (s, r) => (r || document).querySelector(s);
+
+  function el(tag, attrs) {
+    const e = document.createElement(tag);
+    if (attrs) {
+      for (const k of Object.keys(attrs)) {
+        const v = attrs[k];
+        if (v == null || v === false) continue;
+        if (k === 'class') e.className = v;
+        else if (k === 'text') e.textContent = v;
+        else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+        else e.setAttribute(k, v === true ? '' : v);
+      }
+    }
+    for (let i = 2; i < arguments.length; i++) append(e, arguments[i]);
+    return e;
+  }
+  function append(e, kid) {
+    if (kid == null || kid === false) return;
+    if (Array.isArray(kid)) { kid.forEach(k => append(e, k)); return; }
+    e.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  }
+
+  const TYPE_KEYS = ['nit', 'rock', 'tag', 'lag', 'fish', 'station', 'maniac'];
+  const VIEWS = ['players', 'import', 'history', 'my-game', 'odds'];
+  const SUIT = { s: '♠', h: '♥', d: '♦', c: '♣' };
+
+  const state = {
+    db: null, dbState: 'connecting', dbError: null, canWrite: true,
+    docs: new Map(), notes: new Map(), model: null, rows: [],
+    pending: null, saving: null, importError: null,
+    view: currentView(), limit: 100, open: null, formDirty: false, armed: null
+  };
+
+  // ---------- Data ----------
+  function rebuild() {
+    state.model = VF.aggregateDocs(Array.from(state.docs.values()));
+    const heroes = state.model.heroes;
+    state.rows = Object.values(state.model.players)
+      .filter(p => !heroes.has(p.name))
+      .map(p => {
+        const d = VF.derive(p.c);
+        return { name: p.name, rec: p, d, auto: VF.classify(d), target: VF.targetScore(d) };
+      });
+  }
+  function noteFor(name) { return state.notes.get(VF.keyFor(name)) || null; }
+  function typeOf(row) {
+    const n = noteFor(row.name);
+    return n && TYPE_KEYS.indexOf(n.tag) >= 0 ? n.tag : row.auto;
+  }
+  function aliasOf(name) {
+    const n = noteFor(name);
+    return n && typeof n.alias === 'string' && n.alias.trim() ? n.alias.trim() : '';
+  }
+
+  async function initDb() {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { state.dbState = 'unavailable'; rebuild(); render(); return; }
+    state.db = db;
+    try {
+      const user = window.claude && window.claude.use ? await window.claude.use('user') : null;
+      if (user) {
+        const can = await user.can('data.write');
+        if (can === false) state.canWrite = false;
+      }
+    } catch (e) { /* keep inputs; a refused write will say so */ }
+    const timer = setTimeout(() => {
+      if (state.dbState === 'connecting') { state.dbState = 'slow'; render(); }
+    }, 10000);
+    db.collection('imports').onSnapshot(snap => {
+      state.docs = new Map(snap.docs.map(d => [d.id, Object.assign({ _id: d.id }, d.data())]));
+      if (!snap.metadata.fromCache) { clearTimeout(timer); state.dbState = 'ready'; }
+      else if (state.dbState === 'connecting') state.dbState = 'cached';
+      rebuild();
+      render();
+    }, err => {
+      clearTimeout(timer);
+      state.dbState = 'error';
+      state.dbError = err && err.code;
+      render();
+    });
+    db.collection('notes').onSnapshot(snap => {
+      state.notes = new Map(snap.docs.map(d => [d.id, d.data()]));
+      render();
+    }, () => {});
+  }
+
+  function writeError(e) {
+    const code = e && e.code;
+    if (code === 'quota_exceeded') return 'Storage is full. Delete an old import on the Imports tab, then try again.';
+    if (code === 'invalid_argument') { state.canWrite = false; return 'You can view these stats but not change them.'; }
+    if (code === 'revoked' || code === 'not_granted') return 'This page lost access to its storage. Reload it to try again.';
+    return 'Saving failed because the connection dropped. Check your connection and try again.';
+  }
+  async function withRetry(fn) {
+    try { return await fn(); }
+    catch (e) {
+      if (e && (e.code === 'unavailable' || !e.code)) {
+        await new Promise(r => setTimeout(r, 600 + Math.random() * 600));
+        return fn();
+      }
+      throw e;
+    }
+  }
+
+  // ---------- Import ----------
+  async function readFiles(files) {
+    state.importError = null;
+    const texts = [], names = [];
+    for (const f of Array.from(files)) {
+      try {
+        if (/\.zip$/i.test(f.name) || /zip/.test(f.type)) {
+          if (!window.JSZip) { state.importError = 'Zip files could not be opened on this device. Unzip it and upload the .txt files instead.'; continue; }
+          const zip = await window.JSZip.loadAsync(f);
+          const entries = Object.values(zip.files).filter(z => !z.dir && /\.txt$/i.test(z.name));
+          for (const z of entries) texts.push(await z.async('string'));
+          names.push(`${f.name} (${entries.length} ${entries.length === 1 ? 'file' : 'files'})`);
+        } else {
+          texts.push(await f.text());
+          names.push(f.name);
+        }
+      } catch (e) {
+        state.importError = `${f.name} could not be read. Make sure it's a hand history .txt or a PokerCraft .zip.`;
+      }
+    }
+    if (texts.length) preview(texts, names.join(', '), false);
+    else renderImport();
+  }
+
+  function preview(texts, label, sample) {
+    const known = state.model ? state.model.knownIds : new Set();
+    const agg = VF.analyze(texts, known);
+    state.pending = { agg, label, sample };
+    state.saving = null;
+    go('import');
+    renderImport();
+    const box = $('#import-result');
+    if (box) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function loadSample() {
+    try {
+      const res = await fetch('sample-session.txt');
+      if (!res.ok) throw new Error(String(res.status));
+      preview([await res.text()], 'Sample session (simulated hands)', true);
+    } catch (e) {
+      state.importError = 'The sample session could not be loaded. Check your connection and try again.';
+      go('import');
+      renderImport();
+    }
+  }
+
+  async function savePending() {
+    const p = state.pending;
+    if (!p || !p.agg.hands || state.saving) return;
+    let docs;
+    try { docs = VF.buildDocs(p.agg, { label: p.label, sample: p.sample }); }
+    catch (e) { state.importError = e.message; renderImport(); return; }
+    if (!state.db) {
+      docs.forEach(d => state.docs.set(d.id, Object.assign({ _id: d.id }, d.data)));
+      state.pending = null;
+      rebuild();
+      toast(`Added ${p.agg.hands} hands for this visit only.`);
+      go('players');
+      return;
+    }
+    state.saving = { done: 0, total: docs.length, error: null };
+    renderImport();
+    for (const d of docs) {
+      try {
+        await withRetry(() => state.db.collection('imports').doc(d.id).set(d.data));
+        state.saving.done++;
+        renderImport();
+      } catch (e) {
+        state.saving.error = writeError(e);
+        renderImport();
+        return;
+      }
+    }
+    state.pending = null;
+    state.saving = null;
+    toast(`Added ${p.agg.hands} hands.`);
+    go('players');
+  }
+
+  async function deleteImport(imp) {
+    if (state.armed !== imp.group) { state.armed = imp.group; renderHistory(); return; }
+    state.armed = null;
+    if (!state.db) {
+      imp.ids.forEach(id => state.docs.delete(id));
+      rebuild(); render();
+      toast('Import removed.');
+      return;
+    }
+    try {
+      for (const id of imp.ids) await withRetry(() => state.db.collection('imports').doc(id).delete());
+      toast('Import removed.');
+    } catch (e) {
+      toast(writeError(e));
+    }
+  }
+
+  // ---------- Formatting ----------
+  function pct(v) { return v == null ? '–' : Math.round(v) + ''; }
+  function bbFmt(v) { if (v == null) return '–'; const r = Math.round(v * 10) / 10; return (r > 0 ? '+' : '') + r.toFixed(1); }
+  function dateOf(s) {
+    if (!s) return null;
+    const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/);
+    if (!m) return null;
+    if (/Z$|[+-]\d{2}:\d{2}$/.test(s)) return new Date(s);
+    return new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+  }
+  function fmtDate(s, withTime) {
+    const d = dateOf(s);
+    if (!d || isNaN(d)) return '–';
+    const opts = { day: 'numeric', month: 'short', year: 'numeric' };
+    if (withTime) { opts.hour = '2-digit'; opts.minute = '2-digit'; }
+    return d.toLocaleString('en-GB', opts);
+  }
+  function plural(n, one, many) { return `${n.toLocaleString('en-GB')} ${n === 1 ? one : (many || one + 's')}`; }
+  function firstSentence(t) { const m = String(t).match(/^[^.]*\./); return m ? m[0] : t; }
+  function cardsEl(str, board) {
+    const box = el('span', { class: 'cards' + (board ? ' board' : '') });
+    String(str || '').split(/\s+/).filter(Boolean).forEach(c => {
+      const r = c[0].toUpperCase() === 'T' ? '10' : c[0].toUpperCase();
+      const s = c[1] ? c[1].toLowerCase() : '';
+      box.append(el('span', { class: 'card s-' + s, 'aria-label': r + ' of ' + ({ s: 'spades', h: 'hearts', d: 'diamonds', c: 'clubs' }[s] || '') }, r + (SUIT[s] || '')));
+    });
+    return box;
+  }
+  function chip(type) { return el('span', { class: 'chip t-' + type }, VF.TYPES[type].label); }
+  function hudCells(d) {
+    const cell = (key, label, v) => el('span', { class: d[key] && d[key].conf === 'low' ? 'dim' : '' },
+      el('b', { class: d[key] && d[key].conf === 'low' ? 'muted' : '' }, v), el('i', null, label));
+    return el('span', { class: 'hud' },
+      cell('vpip', 'VPIP', pct(d.vpip.v)), cell('pfr', 'PFR', pct(d.pfr.v)), cell('tb', '3B', pct(d.tb.v)),
+      cell('af', 'AF', d.af.v == null ? '–' : VF.fmtStat(VF.STAT_BY_KEY.af, d.af.v)), cell('wtsd', 'SD', pct(d.wtsd.v)));
+  }
+
+  // ---------- Render ----------
+  function render() {
+    document.querySelectorAll('.tab').forEach(t => {
+      if (t.dataset.view === state.view) t.setAttribute('aria-current', 'page');
+      else t.removeAttribute('aria-current');
+    });
+    VIEWS.forEach(v => { $('#view-' + v).hidden = v !== state.view; });
+    renderBanner();
+    if (state.view === 'players') renderPlayers();
+    else if (state.view === 'import') renderImport();
+    else if (state.view === 'history') renderHistory();
+    else if (state.view === 'odds') renderOdds();
+    else renderMyGame();
+    if (state.open && !state.formDirty) renderSheet();
+  }
+
+  function renderBanner() {
+    const b = $('#banner');
+    let msg = '', info = false;
+    if (state.dbState === 'unavailable') msg = 'Not saving. This copy of the page can’t reach its storage, so anything you import lasts until you close it. Open the page on claude.ai to keep your stats.';
+    else if (state.dbState === 'slow') msg = 'Can’t reach your saved stats yet. They will appear as soon as the connection comes back.';
+    else if (state.dbState === 'cached') { msg = 'Showing your last saved copy while the page reconnects.'; info = true; }
+    else if (state.dbState === 'error') msg = 'Your saved stats couldn’t be loaded. Reload the page to try again.';
+    else if (!state.canWrite) { msg = 'You can view these stats but can’t add or change them.'; info = true; }
+    else if (state.model && state.model.imports.length && state.model.imports.every(i => i.sample)) {
+      msg = 'You’re looking at the sample session (simulated hands). Add your own hand histories on the Import tab, then remove the sample on the Imports tab.';
+      info = true;
+    }
+    b.hidden = !msg;
+    b.className = 'banner' + (info ? ' info' : '');
+    b.textContent = msg;
+  }
+
+  function loading() { return state.dbState === 'connecting' && !state.docs.size; }
+
+  function renderPlayers() {
+    const body = $('#players-body');
+    const line = $('#overview-line');
+    const m = state.model;
+    body.replaceChildren();
+    $('#targets').hidden = true;
+    if (loading()) { line.textContent = 'Loading your stats…'; body.append(el('div', { class: 'panel empty' }, el('p', null, 'Loading your stats…'))); return; }
+    if (!m || !state.rows.length) {
+      line.textContent = 'No hands yet';
+      $('#controls').hidden = true;
+      body.append(el('div', { class: 'panel empty' },
+        el('h3', null, 'No opponents yet'),
+        el('p', null, 'Import a hand history file from PokerCraft and every opponent at your tables gets a profile here: their stats, their player type and how to beat them.'),
+        el('div', { class: 'actions' },
+          el('a', { class: 'btn primary', href: '#import' }, 'Import hand histories'),
+          el('button', { class: 'btn', type: 'button', 'data-action': 'sample' }, 'Load the sample session'))));
+      return;
+    }
+    $('#controls').hidden = false;
+    const lastSeen = m.imports.reduce((a, i) => (i.lastAt && (!a || i.lastAt > a) ? i.lastAt : a), null);
+    line.replaceChildren(
+      el('b', null, plural(state.rows.length, 'opponent')), ' · ',
+      el('b', null, plural(m.totalHands, 'hand')), ' · ',
+      plural(m.imports.length, 'import'), lastSeen ? ` · last session ${fmtDate(lastSeen)}` : '');
+
+    // Best targets
+    const targets = state.rows.filter(r => r.target != null && r.target > 0 && ['tag', 'nit'].indexOf(typeOf(r)) < 0)
+      .sort((a, b) => b.target - a.target).slice(0, 3);
+    if (targets.length) {
+      $('#targets').hidden = false;
+      $('#target-list').replaceChildren(...targets.map((r, i) => {
+        const tips = VF.exploits(r.d, typeOf(r));
+        return el('button', { class: 'target', type: 'button', onclick: () => openPlayer(r.name) },
+          el('span', { class: 'target-rank' }, String(i + 1)),
+          el('span', null,
+            el('span', { class: 'target-name' }, aliasOf(r.name) || r.name, ' ', chip(typeOf(r))),
+            el('span', { class: 'target-why' }, tips[0].short)));
+      }));
+    }
+
+    const q = $('#q').value.trim().toLowerCase();
+    const min = +$('#min').value;
+    const sort = $('#sort').value;
+    let rows = state.rows.filter(r => r.d.hands >= min);
+    if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q) || aliasOf(r.name).toLowerCase().includes(q));
+    const by = {
+      hands: (a, b) => b.d.hands - a.d.hands,
+      target: (a, b) => (b.target == null ? -1 : b.target) - (a.target == null ? -1 : a.target) || b.d.hands - a.d.hands,
+      vpip: (a, b) => (b.d.vpip.v || 0) - (a.d.vpip.v || 0),
+      af: (a, b) => (b.d.af.v || 0) - (a.d.af.v || 0),
+      recent: (a, b) => String(b.rec.lastSeen || '').localeCompare(String(a.rec.lastSeen || ''))
+    }[sort] || ((a, b) => b.d.hands - a.d.hands);
+    rows.sort(by);
+
+    if (!rows.length) {
+      body.append(el('div', { class: 'panel empty' },
+        el('p', null, q ? `No player matches “${$('#q').value.trim()}”.` : 'No player has that many hands yet. Choose a smaller sample.')));
+      return;
+    }
+    const list = el('div', { class: 'list', role: 'list' },
+      el('div', { class: 'list-head', 'aria-hidden': 'true' },
+        el('span', { class: 'c-name' }, 'Player'), el('span', { class: 'c-chip' }, 'Type'),
+        el('span', { class: 'c-hud' }, 'HUD'), el('span', { class: 'c-bb' }, 'bb/100')));
+    rows.slice(0, state.limit).forEach(r => {
+      const type = typeOf(r);
+      const alias = aliasOf(r.name);
+      const tip = r.d.hands >= 30 ? VF.exploits(r.d, type)[0].short : '';
+      const bb = r.d.bb100.v;
+      list.append(el('button', { class: 'row', type: 'button', role: 'listitem', onclick: () => openPlayer(r.name) },
+        el('span', { class: 'c-name' },
+          el('span', { class: 'row-name' }, alias || r.name),
+          el('span', { class: 'row-sub' }, (alias ? r.name + ' · ' : '') + plural(r.d.hands, 'hand') + ' · ' + plural(r.rec.sessions, 'session'))),
+        el('span', { class: 'c-chip' }, chip(type)),
+        el('span', { class: 'c-hud' }, hudCells(r.d)),
+        el('span', { class: 'c-bb bb' },
+          el('b', { class: (r.d.bb100.conf === 'low' ? 'muted ' : '') + (bb > 0 ? 'pos' : bb < 0 ? 'neg' : '') }, bbFmt(bb)),
+          el('i', null, 'bb/100')),
+        tip ? el('span', { class: 'c-tip' }, el('b', null, 'Exploit: '), tip) : null));
+    });
+    body.append(list);
+    if (rows.length > state.limit) {
+      list.append(el('div', { class: 'more' },
+        el('button', { class: 'btn small', type: 'button', onclick: () => { state.limit += 100; renderPlayers(); } },
+          `Show more (${(rows.length - state.limit).toLocaleString('en-GB')} left)`)));
+    }
+  }
+
+  function renderImport() {
+    const box = $('#import-result');
+    box.replaceChildren();
+    if (state.importError) box.append(el('div', { class: 'banner' }, state.importError));
+    const p = state.pending;
+    if (!p) return;
+    const a = p.agg;
+    const skipped = a.skipped.tournament + a.skipped.other;
+    const opp = Object.keys(a.players).filter(n => a.heroes.indexOf(n) < 0).length;
+    const range = a.firstAt ? `${fmtDate(a.firstAt, true)} – ${fmtDate(a.lastAt, true)}` : '–';
+    const facts = el('dl', { class: 'facts' },
+      fact('New hands', a.hands.toLocaleString('en-GB')),
+      fact('Already added', a.dup.toLocaleString('en-GB')),
+      fact('Opponents', opp.toLocaleString('en-GB')),
+      fact('Stakes', a.stakes.join(', ') || '–'),
+      fact('Played', range),
+      fact('You', a.heroes.join(', ') || 'not found'),
+      skipped ? fact('Skipped', `${skipped} (tournament or non-Hold'em)`) : null,
+      a.skipped.unreadable + a.errors ? fact('Couldn’t read', String(a.skipped.unreadable + a.errors)) : null);
+    const panel = el('div', { class: 'panel' },
+      el('span', { class: 'eyebrow' }, p.sample ? 'Sample session' : 'Ready to add'),
+      el('h3', null, p.label || 'Pasted hands'),
+      facts);
+    if (!a.found) {
+      panel.append(el('p', null, 'No hands found. The file should start with lines like “Poker Hand #HD…: Hold’em No Limit”. Make sure it’s a cash game hand history from PokerCraft.'));
+    } else if (!a.hands) {
+      panel.append(el('p', null, a.dup ? `Nothing new to add. All ${plural(a.dup, 'hand')} are already in your stats.` : 'None of these hands are No-Limit Hold’em cash hands, so there is nothing to add.'));
+    }
+    const s = state.saving;
+    if (s) {
+      const bar = el('div', { class: 'progress', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(s.total), 'aria-valuenow': String(s.done) }, el('span'));
+      bar.firstChild.style.width = (s.done / s.total * 100) + '%';
+      panel.append(bar, el('p', { class: 'muted small' }, s.error || `Saving… ${s.done} of ${s.total}`));
+    }
+    const can = a.hands > 0 && state.canWrite && !(s && !s.error);
+    panel.append(el('div', { class: 'actions' },
+      a.hands ? el('button', { class: 'btn primary', type: 'button', disabled: !can, onclick: savePending },
+        s && s.error ? 'Try again' : `Add ${plural(a.hands, 'hand')} to my stats`) : null,
+      el('button', { class: 'btn', type: 'button', disabled: !!(s && !s.error), onclick: () => { state.pending = null; state.saving = null; state.importError = null; renderImport(); } },
+        a.hands ? 'Discard' : 'Close')));
+    box.append(panel);
+  }
+  function fact(k, v) { return el('div', null, el('dt', null, k), el('dd', null, v)); }
+
+  function renderHistory() {
+    const body = $('#history-body');
+    body.replaceChildren();
+    const m = state.model;
+    if (loading()) { body.append(el('div', { class: 'panel empty' }, el('p', null, 'Loading your imports…'))); return; }
+    if (!m || !m.imports.length) {
+      body.append(el('div', { class: 'panel empty' }, el('p', null, 'Nothing imported yet.'),
+        el('a', { class: 'btn primary', href: '#import' }, 'Import hand histories')));
+      return;
+    }
+    const list = el('div', { class: 'list' });
+    m.imports.forEach(imp => {
+      const armed = state.armed === imp.group;
+      list.append(el('div', { class: 'imp' },
+        el('div', null,
+          el('div', { class: 'imp-title' }, imp.label || 'Hand histories', imp.sample ? el('span', { class: 'tag-sample' }, 'Sample') : null),
+          el('div', { class: 'imp-meta' },
+            `${plural(imp.hands, 'hand')} · ${plural(imp.players, 'player')} · ${imp.stakes.join(', ')}`),
+          el('div', { class: 'imp-meta' },
+            `Played ${fmtDate(imp.firstAt)}${imp.lastAt && fmtDate(imp.lastAt) !== fmtDate(imp.firstAt) ? ' – ' + fmtDate(imp.lastAt) : ''} · added ${fmtDate(imp.createdAt)}`),
+          imp.complete ? null : el('div', { class: 'imp-meta neg' }, 'Only partly saved. Remove it and import the file again.')),
+        el('div', { class: 'actions' },
+          armed ? el('button', { class: 'btn small', type: 'button', onclick: () => { state.armed = null; renderHistory(); } }, 'Keep') : null,
+          el('button', { class: 'btn small danger' + (armed ? ' armed' : ''), type: 'button', disabled: !state.canWrite, onclick: () => deleteImport(imp) },
+            armed ? `Remove ${plural(imp.hands, 'hand')}` : 'Remove'))));
+    });
+    body.append(list);
+  }
+
+  function statRows(d, groups) {
+    const box = el('div', { class: 'stats' });
+    VF.STATS.filter(s => groups.indexOf(s.grp) >= 0).forEach(s => {
+      const x = d[s.k];
+      const has = x && x.v != null;
+      const out = has && (x.v > s.hi || x.v < s.lo);
+      const bar = el('div', { class: 'bar', role: 'img',
+        'aria-label': `${s.label} ${has ? VF.fmtStat(s, x.v) : 'no data'}, usual ${s.lo} to ${s.hi}` });
+      const band = el('span', { class: 'bar-band' });
+      const scale = v => Math.max(0, Math.min(100, v / s.max * 100));
+      band.style.left = scale(s.lo) + '%';
+      band.style.width = (scale(s.hi) - scale(s.lo)) + '%';
+      bar.append(band);
+      if (has) {
+        const dot = el('span', { class: 'bar-dot' + (out ? ' out' : '') + (x.conf === 'low' ? ' low' : '') });
+        dot.style.left = scale(x.v) + '%';
+        bar.append(dot);
+      }
+      const usual = s.unit === '%' ? `${s.lo}–${s.hi}%` : `${s.lo}–${s.hi}`;
+      const meta = has ? `Usual ${usual} · ${plural(x.n, 'spot')}${x.conf === 'low' ? ' · too few to trust yet' : ''}` : `Usual ${usual} · no spots yet`;
+      box.append(el('div', { class: 'stat' },
+        el('div', { class: 'stat-label' }, s.label, el('small', null, s.tip)),
+        el('div', { class: 'stat-bar' }, bar),
+        el('div', { class: 'stat-meta' }, meta),
+        el('div', { class: 'stat-val' + (!has || x.conf === 'low' ? ' dim' : '') }, has ? VF.fmtStat(s, x.v) : '–')));
+    });
+    return box;
+  }
+
+  function positionsTable(d) {
+    const names = { EP: 'Early', MP: 'Middle', CO: 'Cutoff', BTN: 'Button', SB: 'Small blind', BB: 'Big blind' };
+    return el('div', { class: 'scroll-x' }, el('table', { class: 'pos-table' },
+      el('thead', null, el('tr', null, el('th', null, 'Position'), el('th', null, 'Hands'), el('th', null, 'VPIP'), el('th', null, 'PFR'))),
+      el('tbody', null, d.positions.map(p => el('tr', null,
+        el('td', null, names[p.g]), el('td', null, p.hands.toLocaleString('en-GB')),
+        el('td', { class: p.hands < 20 ? 'muted' : '' }, p.vpip == null ? '–' : Math.round(p.vpip) + '%'),
+        el('td', { class: p.hands < 20 ? 'muted' : '' }, p.pfr == null ? '–' : Math.round(p.pfr) + '%'))))));
+  }
+
+  function bigHud(d) {
+    const c = (label, v, conf) => el('div', null, el('b', { class: conf === 'low' ? 'muted' : '' }, v), el('i', null, label));
+    return el('div', { class: 'bighud' },
+      c('VPIP', pct(d.vpip.v), d.vpip.conf), c('PFR', pct(d.pfr.v), d.pfr.conf), c('3-Bet', pct(d.tb.v), d.tb.conf),
+      c('AF', d.af.v == null ? '–' : VF.fmtStat(VF.STAT_BY_KEY.af, d.af.v), d.af.conf), c('WTSD', pct(d.wtsd.v), d.wtsd.conf));
+  }
+
+  function renderMyGame() {
+    const body = $('#mygame-body');
+    body.replaceChildren();
+    if (loading()) { body.append(el('div', { class: 'panel empty' }, el('p', null, 'Loading…'))); return; }
+    const m = state.model;
+    const heroes = m ? Array.from(m.heroes) : [];
+    const c = VF.blank();
+    heroes.forEach(h => { if (m.players[h]) VF.addInto(c, m.players[h].c); });
+    if (!c.hands) {
+      body.append(el('div', { class: 'panel empty' }, el('p', null, 'Your own stats appear here once you import hands. Your seat is found from the hole cards dealt to you.')));
+      return;
+    }
+    const d = VF.derive(c);
+    const leaks = VF.heroLeaks(d);
+    const bb = d.bb100.v;
+    body.append(
+      el('p', { class: 'muted' }, `${plural(c.hands, 'hand')} as ${heroes.join(', ')} · `,
+        el('span', { class: bb > 0 ? 'pos' : bb < 0 ? 'neg' : '' }, `${bbFmt(bb)} bb/100`),
+        c.hands < 1000 ? ' · results swing a lot until you have thousands of hands' : ''),
+      bigHud(d),
+      el('div', { class: 'panel' },
+        el('h3', null, 'Where you differ from a solid regular'),
+        leaks.length
+          ? el('ul', { class: 'steps' }, leaks.slice(0, 6).map(l => el('li', null, l.text, el('span', { class: 'muted small' }, ` (${plural(l.n, 'spot')})`))))
+          : el('p', { class: 'muted' }, 'Every stat with enough hands is inside the usual regular range.')),
+      el('div', { class: 'panel' }, el('h3', null, 'Preflop'), statRows(d, ['Preflop'])),
+      el('div', { class: 'panel' }, el('h3', null, 'After the flop'), statRows(d, ['Postflop', 'Showdown'])),
+      el('div', { class: 'panel' }, el('h3', null, 'By position'), positionsTable(d)));
+  }
+
+  // ---------- Player sheet ----------
+  let lastFocus = null;
+  function openPlayer(name) {
+    lastFocus = document.activeElement;
+    state.open = name;
+    state.formDirty = false;
+    $('#sheet').hidden = false;
+    document.body.style.overflow = 'hidden';
+    renderSheet();
+    $('#sheet-panel').scrollTop = 0;
+    const btn = $('#sheet-panel .close');
+    if (btn) btn.focus();
+  }
+  function closeSheet() {
+    state.open = null;
+    state.formDirty = false;
+    $('#sheet').hidden = true;
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  function renderSheet() {
+    const name = state.open;
+    const panel = $('#sheet-panel');
+    const rec = state.model && state.model.players[name];
+    if (!rec) { closeSheet(); return; }
+    const row = state.rows.find(r => r.name === name) || { name, rec, d: VF.derive(rec.c), auto: VF.classify(VF.derive(rec.c)) };
+    const d = row.d;
+    const type = typeOf(row);
+    const note = noteFor(name) || {};
+    const alias = aliasOf(name);
+    const plays = VF.exploits(d, type);
+    const bb = d.bb100.v;
+    const scroll = panel.scrollTop;
+
+    const closeBtn = el('button', { class: 'close', type: 'button', 'aria-label': 'Close player', onclick: closeSheet });
+    closeBtn.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>';
+
+    const shortRead = `${VF.TYPES[type].label.toUpperCase()} ${pct(d.vpip.v)}/${pct(d.pfr.v)}/${pct(d.tb.v)} (${d.hands}h) – ${plays.map(p => p.short).slice(0, 2).join(' ')}`;
+
+    const aliasIn = el('input', { id: 'f-alias', class: 'input', type: 'text', maxlength: '60', placeholder: 'e.g. their table name', value: alias, disabled: !state.canWrite });
+    const tagSel = el('select', { id: 'f-tag', class: 'select', disabled: !state.canWrite },
+      el('option', { value: '' }, `Automatic (${VF.TYPES[row.auto].label})`),
+      TYPE_KEYS.map(k => el('option', { value: k, selected: note.tag === k }, VF.TYPES[k].label)));
+    const textIn = el('textarea', { id: 'f-text', placeholder: 'Tells, timing, sizing patterns, history…', maxlength: '4000', disabled: !state.canWrite });
+    textIn.value = typeof note.text === 'string' ? note.text : '';
+    textIn.style.minHeight = '96px';
+    textIn.style.fontFamily = 'var(--font-body)';
+    textIn.style.fontSize = '14px';
+    const savedLine = el('span', { class: 'saved', id: 'f-saved' }, note.updatedAt ? `Saved ${fmtDate(note.updatedAt, true)}` : '');
+    const markDirty = () => { state.formDirty = true; savedLine.textContent = 'Unsaved changes'; };
+    [aliasIn, tagSel, textIn].forEach(i => { i.addEventListener('input', markDirty); i.addEventListener('change', markDirty); });
+    const saveBtn = el('button', { class: 'btn primary', type: 'button', disabled: !state.canWrite, onclick: async () => {
+      const data = { name, alias: aliasIn.value.trim().slice(0, 60), tag: tagSel.value, text: textIn.value.slice(0, 4000), updatedAt: new Date().toISOString() };
+      if (!state.db) {
+        state.notes.set(VF.keyFor(name), data);
+        state.formDirty = false;
+        toast('Saved for this visit only.');
+        render();
+        return;
+      }
+      saveBtn.disabled = true;
+      savedLine.textContent = 'Saving…';
+      try {
+        await withRetry(() => state.db.collection('notes').doc(VF.keyFor(name)).set(data));
+        state.formDirty = false;
+        toast('Notes saved.');
+        render();
+      } catch (e) {
+        savedLine.textContent = writeError(e);
+        saveBtn.disabled = false;
+      }
+    } }, 'Save notes');
+
+    const copyBtn = el('button', { class: 'btn', type: 'button', onclick: () => {
+      const done = () => toast('Short read copied.');
+      const fallback = () => {
+        const ta = el('textarea', { class: 'input', readonly: true });
+        ta.value = shortRead;
+        copyBtn.after(ta);
+        ta.select();
+        toast('Select and copy the text below.');
+      };
+      try {
+        const pr = navigator.clipboard && navigator.clipboard.writeText(shortRead);
+        if (pr && pr.then) pr.then(done, fallback); else fallback();
+      } catch (e) { fallback(); }
+    } }, 'Copy short read');
+
+    const shown = rec.shown || [];
+    panel.replaceChildren(
+      el('div', { class: 'sheet-top' },
+        el('div', { class: 'who' },
+          el('h2', { class: 'who-name', id: 'sheet-name' }, alias || name),
+          el('div', { class: 'who-line' }, chip(type),
+            el('span', null, VF.readStrength(d.hands)),
+            el('span', null, plural(d.hands, 'hand')),
+            el('span', null, plural(rec.sessions, 'session')),
+            el('span', null, 'last seen ' + fmtDate(rec.lastSeen))),
+          alias ? el('div', { class: 'who-line mono' }, name) : null),
+        closeBtn),
+      el('p', { class: 'muted' }, VF.TYPES[type].blurb),
+      bigHud(d),
+      el('div', { class: 'panel' },
+        el('h3', null, 'How to beat them'),
+        el('ol', { class: 'plays' }, plays.map(pl => el('li', null, el('span', null, pl.text), pl.evidence ? el('span', { class: 'why' }, pl.evidence) : el('span')))),
+        el('div', { class: 'actions' }, copyBtn)),
+      el('div', { class: 'panel' }, el('h3', null, 'Preflop'), statRows(d, ['Preflop'])),
+      el('div', { class: 'panel' }, el('h3', null, 'After the flop'), statRows(d, ['Postflop'])),
+      el('div', { class: 'panel' }, el('h3', null, 'Showdown and results'), statRows(d, ['Showdown']),
+        el('p', { class: 'small' }, 'Their result: ',
+          el('b', { class: bb > 0 ? 'pos' : bb < 0 ? 'neg' : '' }, `${bbFmt(bb)} bb/100`),
+          el('span', { class: 'muted' }, d.hands < 1000 ? ' · results swing a lot, treat this as a hint until about 1,000 hands' : ''))),
+      el('div', { class: 'panel' }, el('h3', null, 'By position'), positionsTable(d)),
+      el('div', { class: 'panel' },
+        el('h3', null, 'Hands they showed'),
+        shown.length
+          ? el('div', { class: 'sd' }, shown.slice(0, 15).map(s => el('div', { class: 'sd-item' },
+              cardsEl(s[0]),
+              el('span', { class: 'sd-line' }, `${s[1] || '?'} · ${s[2]}`,
+                el('span', { class: 'muted' }, cardsEl(s[3], true), s[6] ? ' ' + fmtDate(s[6], true) : '')),
+              el('span', { class: 'mono num ' + (s[5] > 0 ? 'pos' : s[5] < 0 ? 'neg' : '') }, `${bbFmt(s[5])} bb`))))
+          : el('p', { class: 'muted' }, 'No showdowns yet.')),
+      el('div', { class: 'panel' },
+        el('h3', null, 'Your notes'),
+        el('div', { class: 'form' },
+          el('div', { class: 'row2' },
+            el('div', { class: 'field' }, el('label', { for: 'f-alias' }, 'Name at the table'), aliasIn),
+            el('div', { class: 'field' }, el('label', { for: 'f-tag' }, 'Player type'), tagSel)),
+          el('div', { class: 'field' }, el('label', { for: 'f-text' }, 'Notes'), textIn),
+          el('div', { class: 'actions' }, saveBtn, savedLine))));
+    panel.scrollTop = scroll;
+  }
+
+  // ---------- Odds ----------
+  const ODDS = window.ODDS;
+  const PRESETS = [
+    { v: '100', label: 'Any two cards (100%)' },
+    { v: '45', label: 'Very loose caller (45%)' },
+    { v: '30', label: 'Typical caller (30%)' },
+    { v: '18', label: 'Opening raise (18%)' },
+    { v: '7', label: '3-bet range (7%)' },
+    { v: '3', label: 'Premium hands only (3%)' },
+    { v: 'custom', label: 'Custom width' }
+  ];
+  const calc = {
+    slots: ODDS.parseCards('Ah Qh Kh 7h 2c').concat([null, null]), active: 5,
+    range: '30', pct: 30, action: 'call', token: null, run: null, timer: null, started: false
+  };
+  const STREET_NAMES = { pre: 'Preflop', flop: 'Flop', turn: 'Turn', river: 'River' };
+
+  function cardLabel(c, short) {
+    const r = ODDS.RANKS[c >> 2];
+    return (r === 'T' && !short ? '10' : r) + SUIT[ODDS.SUITS[c & 3]];
+  }
+  function cardName(c) {
+    const names = { T: '10', J: 'Jack', Q: 'Queen', K: 'King', A: 'Ace' };
+    const r = ODDS.RANKS[c >> 2];
+    return `${names[r] || r} of ${{ s: 'spades', h: 'hearts', d: 'diamonds', c: 'clubs' }[ODDS.SUITS[c & 3]]}`;
+  }
+  function cardsOf(list, board) { return cardsEl(list.map(ODDS.cardStr).join(' '), board); }
+  const P = x => ODDS.pctStr(x);
+  const bbs = x => (Math.round(x * 100) / 100).toFixed(2).replace(/0$/, '').replace(/\.0$/, '') + ' bb';
+  const signed = x => (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(2) + ' bb';
+
+  function renderOdds() {
+    if (!calc.started) {
+      calc.started = true;
+      renderSlots();
+      renderPicker();
+    }
+    renderRangeSelect();
+    syncControls();
+    scheduleCalc();
+  }
+
+  function renderSlots() {
+    const box = $('#slots');
+    box.replaceChildren();
+    [['You', [0, 1]], ['Flop', [2, 3, 4]], ['Turn', [5]], ['River', [6]]].forEach(([label, idx]) => {
+      box.append(el('div', { class: 'slot-group' },
+        el('span', { class: 'eyebrow' }, label),
+        el('div', { class: 'slot-row' }, idx.map(i => {
+          const c = calc.slots[i];
+          return el('button', {
+            type: 'button',
+            class: 'slot' + (c != null ? ' filled s-' + ODDS.SUITS[c & 3] : '') + (calc.active === i ? ' active' : ''),
+            'aria-label': `${label}: ${c != null ? cardName(c) : 'empty'}`,
+            'aria-pressed': calc.active === i ? 'true' : 'false',
+            onclick: () => {
+              if (calc.active === i && calc.slots[i] != null) { calc.slots[i] = null; scheduleCalc(); }
+              calc.active = i;
+              renderSlots();
+              renderPicker();
+            }
+          }, c != null ? cardLabel(c) : '+');
+        }))));
+    });
+  }
+
+  function renderPicker() {
+    const box = $('#picker');
+    box.replaceChildren();
+    const used = new Set(calc.slots.filter(c => c != null));
+    for (let s = 0; s < 4; s++) {
+      for (let r = 12; r >= 0; r--) {
+        const c = r * 4 + s;
+        box.append(el('button', {
+          type: 'button', class: 'pick s-' + ODDS.SUITS[s], disabled: used.has(c),
+          'aria-label': cardName(c), onclick: () => pickCard(c)
+        }, cardLabel(c, true)));
+      }
+    }
+  }
+
+  function pickCard(c) {
+    calc.slots[calc.active] = c;
+    const after = calc.slots.findIndex((x, i) => x == null && i > calc.active);
+    const any = calc.slots.findIndex(x => x == null);
+    calc.active = after >= 0 ? after : any >= 0 ? any : calc.active;
+    renderSlots();
+    renderPicker();
+    scheduleCalc();
+  }
+
+  function renderRangeSelect() {
+    const sel = $('#c-range');
+    sel.replaceChildren(...PRESETS.map(p => el('option', { value: p.v }, p.label)));
+    const tracked = state.rows.filter(r => r.d.hands >= 30).sort((a, b) => b.d.hands - a.d.hands).slice(0, 60);
+    if (tracked.length) {
+      sel.append(el('optgroup', { label: 'Tracked players' },
+        tracked.map(r => el('option', { value: 'p:' + r.name }, `${aliasOf(r.name) || r.name} · ${VF.TYPES[typeOf(r)].label}`))));
+    }
+    sel.value = calc.range;
+    if (sel.value !== calc.range) { calc.range = 'custom'; sel.value = 'custom'; }
+  }
+
+  function playerPct(name, action) {
+    const rec = state.model && state.model.players[name];
+    if (!rec) return null;
+    const d = VF.derive(rec.c);
+    const v = action === 'raise' ? d.pfr.v : action === '3bet' ? d.tb.v : d.vpip.v;
+    return v == null ? null : Math.max(2, Math.min(100, Math.round(v)));
+  }
+  function currentPct() {
+    if (calc.range.startsWith('p:')) {
+      const p = playerPct(calc.range.slice(2), calc.action);
+      return p == null ? 30 : p;
+    }
+    if (calc.range === 'custom') return calc.pct;
+    return +calc.range;
+  }
+  function syncControls() {
+    const isPlayer = calc.range.startsWith('p:');
+    $('#c-action-field').hidden = !isPlayer;
+    calc.pct = currentPct();
+    $('#c-pct').value = String(calc.pct);
+    $('#c-pct').disabled = isPlayer;
+    $('#c-pct-out').textContent = calc.pct + '%';
+  }
+
+  function spot() {
+    const hero = calc.slots.slice(0, 2), flop = calc.slots.slice(2, 5), turn = calc.slots[5], river = calc.slots[6];
+    if (hero.some(c => c == null)) return { error: 'Choose your two cards to see the odds.' };
+    const fl = flop.filter(c => c != null).length;
+    if (fl > 0 && fl < 3) return { error: 'Add all three flop cards, or clear them for a preflop spot.' };
+    if (fl === 0 && (turn != null || river != null)) return { error: 'Add the flop before the turn or river.' };
+    if (turn == null && river != null) return { error: 'Add the turn before the river.' };
+    const board = fl ? flop.concat(turn != null ? [turn] : [], river != null ? [river] : []) : [];
+    const pot = Math.max(0, parseFloat($('#c-pot').value) || 0);
+    const toCall = Math.max(0, parseFloat($('#c-call').value) || 0);
+    if (toCall > 0 && pot < toCall) return { error: 'The pot should include the bet you face, so it can’t be smaller than the amount to call.' };
+    $('#c-post-field').hidden = board.length < 3;
+    const post = board.length >= 3 ? $('#c-post').value : '';
+    return { hero, board, pot, toCall, opp: +$('#c-opp').value || 1, pct: currentPct(), post };
+  }
+
+  function scheduleCalc() { clearTimeout(calc.timer); calc.timer = setTimeout(runCalc, 120); }
+  function runCalc() {
+    if (calc.run) calc.run.cancel();
+    const sp = spot();
+    const box = $('#calc-result');
+    if (sp.error) { box.replaceChildren(el('p', { class: 'muted' }, sp.error)); return; }
+    let range = ODDS.topRange(sp.pct);
+    if (sp.post) range = ODDS.narrowRange(range, sp.board, sp.post);
+    const ranges = Array.from({ length: sp.opp }, () => range);
+    const token = {};
+    calc.token = token;
+    calc.run = ODDS.equityAsync({ hero: sp.hero, board: sp.board, ranges, trials: 30000 }, (res, frac) => {
+      if (calc.token === token) renderCalcResult(sp, range, res, frac);
+    });
+  }
+
+  function renderCalcResult(sp, range, res, frac) {
+    const box = $('#calc-result');
+    const eq = res.equity;
+    const v = ODDS.verdict(eq, sp.pot, sp.toCall, sp.opp);
+    const po = ODDS.potOdds(sp.pot, sp.toCall);
+    const fill = el('span', { class: 'fill' });
+    fill.style.width = (eq * 100) + '%';
+    const bar = el('div', { class: 'eqbar', role: 'img', 'aria-label': `Equity ${P(eq)}${sp.toCall > 0 ? ', needed ' + P(po.needed) : ''}` }, fill);
+    if (sp.toCall > 0) {
+      const need = el('span', { class: 'need' });
+      need.style.left = (po.needed * 100) + '%';
+      bar.append(need);
+    }
+    const ci = res.stderr * 1.96 * 100;
+    const parts = [
+      el('div', { class: 'verdict-line' },
+        el('span', { class: 'verdict v-' + v.key }, v.label),
+        el('span', { class: 'muted small' }, frac < 1 ? `Simulating… ${Math.round(frac * 100)}%` : `${res.trials.toLocaleString('en-GB')} simulated hands`)),
+      el('p', null, v.why),
+      bar,
+      el('dl', { class: 'facts' },
+        fact('Your equity', `${P(eq)} (win ${P(res.win)}, tie ${P(res.tie)})`),
+        fact('Needed to call', sp.toCall > 0 ? `${P(po.needed)} · pot odds ${po.ratio.toFixed(1)} : 1` : 'No bet to call'),
+        fact('EV of calling', sp.toCall > 0 ? signed(v.ev) : '–'),
+        fact('Accuracy', `± ${ci.toFixed(1)} points (95%)`))
+    ];
+    if (sp.toCall > 0) {
+      parts.push(el('p', { class: 'formula' },
+        `Needed = ${bbs(sp.toCall)} ÷ (${bbs(sp.pot)} + ${bbs(sp.toCall)}) = ${P(po.needed)}`, el('br'),
+        `EV = ${eq.toFixed(3)} × (${bbs(sp.pot)} + ${bbs(sp.toCall)}) − ${bbs(sp.toCall)} = ${signed(v.ev)}`));
+    }
+    const o = ODDS.outs(sp.hero, sp.board);
+    if (o) {
+      const flop = sp.board.length === 3;
+      parts.push(el('p', { class: 'small' },
+        el('b', null, `${o.n} ${o.n === 1 ? 'card improves' : 'cards improve'} your hand`), ` (you have ${o.current.toLowerCase()} now). `,
+        `Rule of ${flop ? 4 : 2}: about ${Math.min(100, o.rule)}%. Exact chance to improve ${flop ? 'by the river' : 'on the river'}: ${P(o.exact)}. `,
+        el('span', { class: 'muted' }, 'Improving doesn’t always mean winning; equity above already accounts for that.')));
+    }
+    const head = range.classes.slice(0, 6).join(', ');
+    const tail = range.classes.length > 9 ? ' … ' + range.classes.slice(-3).join(', ') : range.classes.slice(6).length ? ', ' + range.classes.slice(6).join(', ') : '';
+    const full = ODDS.topRange(sp.pct);
+    parts.push(el('p', { class: 'muted small' },
+      `${sp.opp === 1 ? 'Opponent' : sp.opp + ' opponents, each'}: top ${sp.pct}% of hands, ${full.classes.length} starting hands (${full.combos.length} combos): ${head}${tail}.` +
+      (range.narrowed ? ` After their ${sp.post === 'raise' ? 'raise' : 'bet'}, ${range.combos.length} combos are left: made hands, draws and some bluffs.` : '')));
+    if (sp.board.length < 5) {
+      const rows = res.cats.map((x, i) => ({ x, i })).filter(r => r.x >= 0.005).sort((a, b) => b.i - a.i);
+      parts.push(el('div', null,
+        el('span', { class: 'eyebrow' }, 'What you finish with by the river'),
+        el('div', { class: 'cats', style: 'margin-top:8px' }, rows.map(r => {
+          const s = el('span');
+          s.style.width = Math.min(100, r.x * 100) + '%';
+          return [el('span', null, ODDS.CATS[r.i]), el('span', { class: 'b' }, s), el('span', { class: 'p' }, P(r.x))];
+        }))));
+    }
+    box.replaceChildren(el('div', { class: 'form', style: 'gap:14px;border-top:1px solid var(--line);padding-top:14px' }, parts));
+  }
+
+  function randomSpot() {
+    const deck = Array.from({ length: 52 }, (_, i) => i);
+    for (let i = 51; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+    const nBoard = [0, 3, 3, 4, 5][Math.floor(Math.random() * 5)];
+    calc.slots = [deck[0], deck[1], null, null, null, null, null];
+    for (let i = 0; i < nBoard; i++) calc.slots[2 + i] = deck[2 + i];
+    calc.active = calc.slots.findIndex(x => x == null);
+    if (calc.active < 0) calc.active = 6;
+    const before = Math.round((3 + Math.random() * 22) * 2) / 2;
+    const bet = [0, 0.33, 0.5, 0.75, 1][Math.floor(Math.random() * 5)];
+    const b = Math.round(before * bet * 2) / 2;
+    $('#c-pot').value = String(before + b);
+    $('#c-call').value = String(b);
+    renderSlots();
+    renderPicker();
+    scheduleCalc();
+  }
+
+  // ---------- Hand replay ----------
+  let sampleHandsCache = null;
+  async function sampleHands() {
+    if (sampleHandsCache) return sampleHandsCache;
+    const res = await fetch('sample-session.txt');
+    if (!res.ok) throw new Error(String(res.status));
+    sampleHandsCache = VF.splitHands(await res.text()).map(lines => lines.join('\n'));
+    return sampleHandsCache;
+  }
+  function facesPostflopBet(h) {
+    for (const s of ['flop', 'turn', 'river']) {
+      let bet = false;
+      for (const a of h.acts) {
+        if (a.s !== s) continue;
+        if (a.n !== h.hero && (a.t === 'bet' || a.t === 'raise')) bet = true;
+        else if (a.n === h.hero && bet) return true;
+      }
+    }
+    return false;
+  }
+  async function replaySample() {
+    const box = $('#replay-result');
+    try {
+      const hands = await sampleHands();
+      for (let tries = 0; tries < 400; tries++) {
+        const text = hands[Math.floor(Math.random() * hands.length)];
+        const h = VF.parseHand(text.split('\n'));
+        if (!h.skip && h.hero && facesPostflopBet(h)) {
+          $('#replay-text').value = text;
+          replay(text);
+          return;
+        }
+      }
+    } catch (e) { /* fall through */ }
+    box.replaceChildren(el('p', { class: 'muted' }, 'The sample hands could not be loaded. Check your connection and try again.'));
+  }
+
+  function rangeFor(name, action) {
+    const tracked = state.model && state.model.players[name];
+    const hands = tracked ? tracked.c.hands : 0;
+    const who = aliasOf(name) || name;
+    const statName = action === 'raise' ? 'PFR' : action === '3bet' ? '3-bet' : 'VPIP';
+    if (tracked && hands >= 30 && action) {
+      const p = playerPct(name, action);
+      if (p != null) return { pct: p, src: `${who}: ${statName} ${p}% over ${hands} hands` };
+    }
+    const def = { raise: 15, '3bet': 6, call: 35 }[action] || 100;
+    const kind = action === 'raise' ? 'raising' : action === '3bet' ? '3-bet' : action === 'call' ? 'calling' : '';
+    return { pct: def, src: action ? `${who}: typical ${kind} range, ${def}%` : `${who}: any two cards (no voluntary action)` };
+  }
+
+  function describeAct(a, bb) {
+    if (a.t === 'fold') return 'folded';
+    if (a.t === 'check') return 'checked';
+    if (a.t === 'call') return `called ${bbs(a.a / bb)}`;
+    if (a.t === 'bet') return `bet ${bbs(a.a / bb)}`;
+    return `raised to ${bbs(a.to / bb)}`;
+  }
+
+  function grade(dec, v) {
+    const t = dec.act.t;
+    if (dec.toCall > 0) {
+      if (t === 'fold') {
+        if (v.key === 'call' || v.key === 'raise') return ['g-bad', 'Folded with the odds to call'];
+        if (v.key === 'close') return ['g-info', 'Close spot'];
+        return ['g-good', 'Good fold'];
+      }
+      if (v.key === 'fold') return t === 'raise' ? ['g-warn', 'Raise needs fold equity'] : ['g-bad', 'Called without the odds'];
+      if (v.key === 'close') return ['g-info', 'Close spot'];
+      return ['g-good', 'Matches the odds'];
+    }
+    if (t === 'bet' || t === 'raise') return v.key === 'check' ? ['g-warn', 'Bet with weak equity'] : ['g-good', 'Value bet'];
+    return v.key === 'bet' ? ['g-warn', 'Checked a strong hand'] : ['g-good', 'Fine check'];
+  }
+
+  async function replay(text) {
+    const box = $('#replay-result');
+    const msg = t => box.replaceChildren(el('p', { class: 'muted', style: 'margin-top:4px' }, t));
+    const hands = VF.splitHands(text);
+    if (!hands.length) return msg('No hand found. Paste the whole hand, starting with the “Poker Hand #…” line.');
+    const h = VF.parseHand(hands[0]);
+    if (h.skip === 'tournament') return msg('That’s a tournament hand. Replay works with cash game hands.');
+    if (h.skip) return msg('This hand couldn’t be read. Make sure it’s a No-Limit Hold’em cash hand from a hand history file.');
+    if (!h.hero || !h.heroCards) return msg('This hand has no “Dealt to … [cards]” line, so your cards are unknown.');
+    const heroCards = ODDS.parseCards(h.heroCards);
+    const board = ODDS.parseCards(h.board.join(' '));
+    const bb = h.bb;
+    const players = h.seats.filter(s => !s.out).map(s => s.name);
+    const folded = new Set();
+    const pre = {};
+    const aggr = {};
+    let comm = {}, street = 'pre', pot = 0, rc = 0;
+    const decs = [];
+    const boardAt = s => board.slice(0, { pre: 0, flop: 3, turn: 4, river: 5 }[s]);
+    const oppRange = o => {
+      const base = rangeFor(o, pre[o]);
+      let r = ODDS.topRange(base.pct);
+      const events = aggr[o] || [];
+      events.forEach(e => { r = ODDS.narrowRange(r, boardAt(e.s), e.kind); });
+      const note = events.length ? ' · narrowed for their ' + events.map(e => `${STREET_NAMES[e.s].toLowerCase()} ${e.kind}`).join(', ') : '';
+      return { name: o, pct: base.pct, range: r, src: base.src + note };
+    };
+    for (const a of h.acts) {
+      if (a.s !== street) { street = a.s; comm = {}; }
+      if (a.t === 'post') {
+        pot += a.a;
+        if (a.kind !== 'ante') comm[a.n] = (comm[a.n] || 0) + (a.kind === 'small & big blinds' ? Math.min(a.a, bb) : a.a);
+        continue;
+      }
+      if (a.n === h.hero) {
+        const maxC = Math.max(0, ...Object.values(comm));
+        const toCall = Math.max(0, maxC - (comm[a.n] || 0));
+        const n = { pre: 0, flop: 3, turn: 4, river: 5 }[street];
+        const opps = players.filter(p => p !== h.hero && !folded.has(p) && (street !== 'pre' || pre[p]));
+        if (board.length >= n) {
+          decs.push({ street, board: board.slice(0, n), pot: pot / bb, toCall: toCall / bb, act: a, opps: opps.map(oppRange) });
+        }
+      } else if (street !== 'pre' && (a.t === 'bet' || a.t === 'raise')) {
+        (aggr[a.n] || (aggr[a.n] = [])).push({ s: street, kind: a.t === 'raise' ? 'raise' : 'bet' });
+      }
+      if (a.t === 'call' || a.t === 'bet') { pot += a.a; comm[a.n] = (comm[a.n] || 0) + a.a; }
+      else if (a.t === 'raise') { pot += Math.max(0, a.to - (comm[a.n] || 0)); comm[a.n] = a.to; }
+      else if (a.t === 'fold') folded.add(a.n);
+      if (street === 'pre') {
+        if (a.t === 'raise') { rc++; pre[a.n] = rc >= 2 ? '3bet' : 'raise'; }
+        else if (a.t === 'call' && !pre[a.n]) pre[a.n] = 'call';
+      }
+    }
+    let net = null;
+    try { net = VF.handStats(h).players[h.hero].netBB; } catch (e) { net = null; }
+    const pctl = ODDS.percentile(heroCards[0], heroCards[1]);
+    const head = el('div', { class: 'form', style: 'gap:8px;border-top:1px solid var(--line);padding-top:14px' },
+      el('div', { class: 'dec-head' }, el('span', { class: 'eyebrow' }, 'Your hand'), cardsOf(heroCards),
+        board.length ? el('span', { class: 'eyebrow' }, 'Board') : null, board.length ? cardsOf(board, true) : null),
+      el('p', { class: 'small muted' },
+        `${ODDS.classOf(heroCards[0], heroCards[1])} is in the top ${Math.max(1, Math.round(pctl))}% of starting hands · ${h.cur || ''}${h.sb}/${h.cur || ''}${h.bb} · `,
+        net == null ? '' : el('b', { class: net > 0 ? 'pos' : net < 0 ? 'neg' : '' }, `result ${signed(net)}`)));
+    const list = el('div', { class: 'decs' });
+    box.replaceChildren(head, list);
+    if (!decs.length) { list.append(el('p', { class: 'muted' }, 'You had no decisions to check in this hand.')); return; }
+
+    let good = 0, graded = 0;
+    for (const dec of decs) {
+      const row = el('div', { class: 'dec' },
+        el('div', { class: 'dec-head' }, el('span', { class: 'dec-street' }, STREET_NAMES[dec.street]),
+          dec.board.length ? cardsOf(dec.board, true) : null, el('span', { class: 'small' }, `You ${describeAct(dec.act, bb)}`)),
+        el('span', { class: 'grade g-info' }, '…'));
+      list.append(row);
+      if (!dec.opps.length) {
+        row.lastChild.replaceWith(el('span', { class: 'grade g-info' }, 'Not graded'));
+        row.append(el('div', { class: 'dec-nums' }, dec.street === 'pre'
+          ? `Nobody had entered the pot yet, so this is an opening decision. Equity against all-in callers doesn't measure it; your hand is in the top ${Math.max(1, Math.round(pctl))}% of starting hands.`
+          : 'No opponents left to compare against.'));
+        continue;
+      }
+      const ranges = dec.opps.map(o => o.range);
+      const res = await ODDS.equityAsync({ hero: heroCards, board: dec.board, ranges, trials: 20000 });
+      if (!res) return;
+      const v = ODDS.verdict(res.equity, dec.pot, dec.toCall, dec.opps.length);
+      const [cls, label] = grade(dec, v);
+      graded++;
+      if (cls === 'g-good' || cls === 'g-info') good++;
+      row.lastChild.replaceWith(el('span', { class: 'grade ' + cls }, label));
+      row.append(
+        el('div', { class: 'dec-nums' },
+          'Pot ', el('b', null, bbs(dec.pot)),
+          dec.toCall > 0 ? [' · to call ', el('b', null, bbs(dec.toCall)), ' · needed ', el('b', null, P(v.need))] : ' · no bet to call',
+          ' · your equity ', el('b', null, P(res.equity)),
+          dec.toCall > 0 ? [' · EV of calling ', el('b', { class: v.ev > 0 ? 'pos' : 'neg' }, signed(v.ev))] : ''),
+        el('div', { class: 'dec-nums' }, v.why),
+        el('div', { class: 'dec-nums' }, 'Against: ' + dec.opps.map(o => o.src).join('; ') + '.' +
+          (dec.street === 'pre' ? ' Preflop equity assumes all the cards are dealt out, so position and later betting are not counted.' : '')));
+    }
+    head.append(el('p', { class: 'small' }, el('b', null, `${good} of ${graded}`), ` graded ${graded === 1 ? 'decision' : 'decisions'} matched the odds or were close.`));
+  }
+
+  // ---------- Misc ----------
+  let toastTimer = null;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+  }
+  function currentView() {
+    const h = (location.hash || '').slice(1);
+    return VIEWS.indexOf(h) >= 0 ? h : 'players';
+  }
+  function go(v) {
+    if ((location.hash || '').slice(1) !== v) location.hash = v;
+    state.view = v;
+    render();
+  }
+
+  window.addEventListener('hashchange', () => { state.view = currentView(); state.armed = null; render(); });
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-action="sample"]');
+    if (t) { e.preventDefault(); loadSample(); }
+  });
+  $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.open) closeSheet(); });
+  ['q', 'min', 'sort'].forEach(id => $('#' + id).addEventListener('input', () => { state.limit = 100; renderPlayers(); }));
+  $('#file').addEventListener('change', e => { if (e.target.files.length) readFiles(e.target.files); e.target.value = ''; });
+  const drop = $('#drop');
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files.length) readFiles(e.dataTransfer.files); });
+  $('#c-opp').addEventListener('change', scheduleCalc);
+  $('#c-post').addEventListener('change', scheduleCalc);
+  $('#c-range').addEventListener('change', e => { calc.range = e.target.value; syncControls(); scheduleCalc(); });
+  $('#c-action').addEventListener('change', e => { calc.action = e.target.value; syncControls(); scheduleCalc(); });
+  $('#c-pct').addEventListener('input', e => {
+    calc.range = 'custom';
+    $('#c-range').value = 'custom';
+    calc.pct = +e.target.value;
+    $('#c-pct-out').textContent = calc.pct + '%';
+    scheduleCalc();
+  });
+  ['c-pot', 'c-call'].forEach(id => $('#' + id).addEventListener('input', scheduleCalc));
+  $('#clear-cards').addEventListener('click', () => {
+    calc.slots = [null, null, null, null, null, null, null];
+    calc.active = 0;
+    renderSlots(); renderPicker(); scheduleCalc();
+  });
+  $('#random-spot').addEventListener('click', randomSpot);
+  $('#replay-go').addEventListener('click', () => replay($('#replay-text').value));
+  $('#replay-sample').addEventListener('click', replaySample);
+  $('#paste-go').addEventListener('click', () => {
+    const txt = $('#paste').value;
+    if (!txt.trim()) { state.importError = 'Paste some hand history text first.'; renderImport(); return; }
+    state.importError = null;
+    preview([txt], 'Pasted hands', false);
+  });
+
+  rebuild();
+  render();
+  initDb();
+})();
+</script>
